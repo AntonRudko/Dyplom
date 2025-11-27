@@ -129,7 +129,42 @@ def graph_ram_usage():
     plt.savefig("Graphs/ram_usage.png")
     plt.show()
 
+def graph_memory_cost_per_state():
+    alphabet = {"0","1","2"}
+    sizes = [50,100,200,300,400]
+
+    cost_sc, cost_brz, cost_ts, cost_sq = [],[],[],[]
+
+    for n in sizes:
+        nfas = [gen_nfa(n, alphabet, 0.1) for _ in range(4)]
+
+        def cost(method):
+            m = [measure_memory(method, x) for x in nfas]
+            s = [len(method(x).states) for x in nfas]
+            return sum(m[i] / s[i] for i in range(len(m))) / len(m)
+
+        cost_sc.append(cost(determinize_nfa))
+        cost_brz.append(cost(determinize_brz))
+        cost_ts.append(cost(determinize_transset))
+
+    plt.figure(figsize=(10,6))
+    plt.plot(sizes, cost_sc, "ro-", label="Subset")
+    plt.plot(sizes, cost_brz, "ms-", label="Brzozowski")
+    plt.plot(sizes, cost_ts, "b^-", label="Transset")
+    plt.xlabel("NFA size")
+    plt.ylabel("RAM / DFA state (KB)")
+    plt.title("Memory cost per DFA state")
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("Graphs/memory_cost_per_state.png")
+    plt.show()
+
+
+
+
 if __name__ == "__main__":
     graph_ram_usage()
     graph_time_vs_states()
+    graph_memory_cost_per_state()
     graph_dfa_size_vs_nfa_size()

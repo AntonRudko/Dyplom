@@ -10,7 +10,7 @@ from Algoritms.transset import determinize_transset
 
 if __name__ == '__main__':
 
-    nfa = nfa_test2
+    nfa = nfa_test1
     dfa = determinize_nfa(nfa)
     dfa2 = determinize_brz(nfa)
     dfa3 = determinize_transset(nfa)
