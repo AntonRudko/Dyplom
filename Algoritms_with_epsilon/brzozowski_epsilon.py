@@ -1,16 +1,20 @@
 from collections import deque
 from Algoritms.class_dfa_nfa import DFA
+from Algoritms_with_epsilon.epsilon_closure import epsilon_closure
 
-def determinize_brz(nfa):
-    alphabet = set(nfa.alphabet)
+
+def determinize_brz_epsilon(nfa):
+    alphabet = {sym for sym in nfa.alphabet if sym != ""}
     total_iterations = [0]
 
     def to_generic_from_nfa(nfa_obj):
         states = set(nfa_obj.states)
-        start_states = {nfa_obj.start_state}
+        start_states = epsilon_closure({nfa_obj.start_state}, nfa_obj.transitions)
         accept_states = set(nfa_obj.accept_states)
         trans = {}
         for (p, a), dsts in nfa_obj.transitions.items():
+            if a == "":
+                continue
             trans[(p, a)] = set(dsts)
         return states, alphabet, start_states, accept_states, trans
 
@@ -71,6 +75,16 @@ def determinize_brz(nfa):
         return dfa_states, alphabet, start_name, dfa_accept, dfa_trans
 
     A_states, A_alpha, A_start, A_accept, A_trans = to_generic_from_nfa(nfa)
+
+    # Додаємо ε-замикання до переходів
+    eps_trans = {}
+    for (p, a), dsts in A_trans.items():
+        closed = set()
+        for d in dsts:
+            closed |= epsilon_closure({d}, nfa.transitions)
+        eps_trans[(p, a)] = closed
+    A_trans = eps_trans
+
     R1 = reverse_automaton(A_states, A_alpha, A_start, A_accept, A_trans)
     D1_states, D1_alpha, D1_start, D1_accept, D1_trans = determinize(*R1)
     R2 = reverse_automaton(D1_states, D1_alpha, {D1_start}, D1_accept, {

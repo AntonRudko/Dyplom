@@ -1,7 +1,9 @@
 from collections import deque
 from Algoritms.class_dfa_nfa import DFA
+from Algoritms_with_epsilon.epsilon_closure import epsilon_closure
 
-def determinize_nfa(nfa):
+
+def determinize_nfa_epsilon(nfa):
     subset_to_name = {}
     state_names = set()
     transitions = {}
@@ -11,16 +13,16 @@ def determinize_nfa(nfa):
     def new_name():
         return f"q{len(subset_to_name)}"
 
-    start_subset = frozenset([nfa.start_state])
+    start_subset = epsilon_closure({nfa.start_state}, nfa.transitions)
     start_name = new_name()
     subset_to_name[start_subset] = start_name
     state_names.add(start_name)
-    if nfa.start_state in nfa.accept_states:
+    if start_subset & nfa.accept_states:
         accept_names.add(start_name)
 
     queue = deque([start_subset])
 
-    alphabet = sorted(nfa.alphabet)
+    alphabet = sorted(sym for sym in nfa.alphabet if sym != "")
 
     while queue:
         current = queue.popleft()
@@ -31,10 +33,11 @@ def determinize_nfa(nfa):
             nxt = set()
             for p in sorted(current):
                 nxt |= nfa.transitions.get((p, symbol), set())
-            nxt = frozenset(nxt)
 
             if not nxt:
                 continue
+
+            nxt = epsilon_closure(nxt, nfa.transitions)
 
             if nxt not in subset_to_name:
                 nm = new_name()
@@ -46,4 +49,5 @@ def determinize_nfa(nfa):
 
             transitions[(cur_name, symbol)] = subset_to_name[nxt]
 
-    return DFA(state_names, nfa.alphabet, transitions, start_name, accept_names), subsets_processed
+    result_alphabet = {sym for sym in nfa.alphabet if sym != ""}
+    return DFA(state_names, result_alphabet, transitions, start_name, accept_names), subsets_processed

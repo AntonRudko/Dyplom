@@ -2,6 +2,7 @@ from collections import deque
 from Algoritms.class_dfa_nfa import DFA
 
 def determinize_transset(nfa):
+    merges_count = 0
     trans_by_state = {s: set() for s in nfa.states}
     for (s, a), targets in nfa.transitions.items():
         for t in targets:
@@ -19,8 +20,10 @@ def determinize_transset(nfa):
     dfa_transitions = {}
 
     def register_tuple(P):
+        nonlocal merges_count
         if P in tuple_to_name:
             return tuple_to_name[P], False
+        merges_count += 1
         name = f"q{len(tuple_to_name)}"
         tuple_to_name[P] = name
         name_to_tuple[name] = P
@@ -54,4 +57,4 @@ def determinize_transset(nfa):
             if is_new:
                 queue.append(name0)
 
-    return DFA(state_names, nfa.alphabet, dfa_transitions, start_name, accept_names)
+    return DFA(state_names, nfa.alphabet, dfa_transitions, start_name, accept_names), merges_count

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Generated output
+Table/tables/
+Table/graphs/
+Table/epsilon_tables/
+Table/epsilon_graphs/
+Table/heatmap_*.png
+At_Simple_Tests/Graphs/
+Analize/Table/
+
+# Graphviz intermediate files
+*.gv
+*.dot

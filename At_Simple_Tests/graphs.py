@@ -10,14 +10,39 @@ from Algoritms.transset import determinize_transset
 
 def gen_nfa(n, alphabet, p):
     states = {f"q{i}" for i in range(n)}
+    state_list = [f"q{i}" for i in range(n)]
+    alpha_list = sorted(alphabet)
     start = "q0"
-    acc = {s for s in states if random.random() < 0.3} or {"q0"}
+
+    acc = {s for s in states if random.random() < 0.3}
+    if not acc:
+        acc = {random.choice(state_list[1:])} if n > 1 else {"q0"}
+
     tr = {}
+
+    # Spine: ланцюг q0→q1→...→q(n-1) для гарантії зв'язності
+    for i in range(n - 1):
+        a = random.choice(alpha_list)
+        key = (state_list[i], a)
+        tr.setdefault(key, set()).add(state_list[i + 1])
+
+    # Гарантія недетермінізму: мінімум одне розгалуження на стан
+    for i in range(n):
+        a = random.choice(alpha_list)
+        t1 = random.choice(state_list)
+        t2 = random.choice(state_list)
+        while t2 == t1 and n > 1:
+            t2 = random.choice(state_list)
+        key = (state_list[i], a)
+        tr.setdefault(key, set()).update({t1, t2})
+
+    # Випадкові ребра
     for s in states:
         for a in alphabet:
             t = {q for q in states if random.random() < p}
             if t:
-                tr[(s, a)] = t
+                tr.setdefault((s, a), set()).update(t)
+
     return NFA(states, alphabet, tr, start, acc)
 
 def height_nfa(n):
@@ -133,14 +158,15 @@ def graph_memory_cost_per_state():
     alphabet = {"0","1","2"}
     sizes = [50,100,200,300,400]
 
-    cost_sc, cost_brz, cost_ts, cost_sq = [],[],[],[]
+    cost_sc, cost_brz, cost_ts = [], [], []
 
     for n in sizes:
         nfas = [gen_nfa(n, alphabet, 0.1) for _ in range(4)]
 
         def cost(method):
+            results = [method(x) for x in nfas]
             m = [measure_memory(method, x) for x in nfas]
-            s = [len(method(x).states) for x in nfas]
+            s = [len(r.states) for r in results]
             return sum(m[i] / s[i] for i in range(len(m))) / len(m)
 
         cost_sc.append(cost(determinize_nfa))

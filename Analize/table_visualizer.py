@@ -25,15 +25,20 @@ def visualize_transition_table(automaton, filename='transition_table.png'):
         automaton.states,
         key=lambda s: (s != automaton.start_state, state_index(s))
     )
+    has_epsilon = any(sym == "" for (_, sym) in automaton.transitions)
     alphabet = sorted(automaton.alphabet)
+    if has_epsilon:
+        display_symbols = [""] + [s for s in alphabet if s != ""]
+    else:
+        display_symbols = alphabet
 
     table_data = [
         [_label(state, automaton)]
-        + [_cell(automaton.transitions.get((state, symbol))) for symbol in alphabet]
+        + [_cell(automaton.transitions.get((state, symbol))) for symbol in display_symbols]
         for state in states
     ]
 
-    col_labels = ["State"] + alphabet
+    col_labels = ["State"] + [("\u03b5" if s == "" else s) for s in display_symbols]
 
     fig, ax = plt.subplots(figsize=(len(col_labels) * 1.2, len(states) * 0.6 + 1))
     ax.axis("off")
