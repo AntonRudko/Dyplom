@@ -113,9 +113,9 @@ def run():
     ax.legend()
 
     plt.tight_layout()
-    plt.savefig("Table/Tests_Diagram/test4_branch_structure.png", dpi=150)
+    plt.savefig("Tests_Diagram/test4_branch_structure.png", dpi=150)
     plt.close()
-    print("\nSaved: Table/Tests_Diagram/test4_branch_structure.png")
+    print("\nSaved: Tests_Diagram/test4_branch_structure.png")
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ import os
 
 
 def main():
-    os.makedirs("Table/Tests_Diagram", exist_ok=True)
+    os.makedirs("Tests_Diagram", exist_ok=True)
 
     tests = {
         "1": ("Exponential Blowup (nth-from-last)", "Tests_Diagram.test1_exponential_blowup"),

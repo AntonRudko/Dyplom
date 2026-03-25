@@ -12,9 +12,9 @@ from Algoritms.sub_set import determinize_nfa
 from Algoritms.class_dfa_nfa import DFA, NFA
 from Tests_Diagram.nfa_generators import gen_nth_from_last
 
-from helpers.dfa_helpers import run_dfa, gen_systematic_words
-from helpers.minimization import minimize_dfa
-from helpers.isomorphism import are_isomorphic
+from unit_tests.helpers.dfa_helpers import run_dfa, gen_systematic_words
+from unit_tests.helpers.minimization import minimize_dfa
+from unit_tests.helpers.isomorphism import are_isomorphic
 
 
 class TestMinimization(unittest.TestCase):

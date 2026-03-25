@@ -16,8 +16,8 @@ from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
 from Analize.nfa import nfa_epsilon
 from Tests_Diagram.nfa_generators import gen_epsilon_chain
 
-from helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words, gen_systematic_words
-from helpers.equivalence import check_language_equivalence_by_words
+from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words, gen_systematic_words
+from unit_tests.helpers.equivalence import check_language_equivalence_by_words
 
 
 class TestEpsilonVariants(unittest.TestCase):

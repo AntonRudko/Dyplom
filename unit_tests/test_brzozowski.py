@@ -14,9 +14,9 @@ from Algoritms.class_dfa_nfa import NFA
 from Analize.nfa import nfa_1, nfa_2, nfa_3, nfa_4, nfa_5
 from Tests_Diagram.nfa_generators import gen_nth_from_last, gen_dense_random, gen_sparse_nfa
 
-from helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words
-from helpers.equivalence import check_language_equivalence_by_words
-from helpers.minimization import minimize_dfa
+from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words
+from unit_tests.helpers.equivalence import check_language_equivalence_by_words
+from unit_tests.helpers.minimization import minimize_dfa
 
 
 class TestBrzozowski(unittest.TestCase):

@@ -26,7 +26,7 @@ ALGORITHMS = [
     ("Lazy+ε",       determinize_lazy_epsilon,      "cv-"),
 ]
 
-OUTPUT_DIR = "Table/Tests_Diagram_Epsilon"
+OUTPUT_DIR = "Tests_Diagram_Epsilon"
 
 
 def measure(alg, nfa, repeats):

@@ -243,9 +243,9 @@ def run():
     ax.legend(fontsize=7)
 
     plt.tight_layout()
-    plt.savefig("Table/Tests_Diagram/test8_correctness.png", dpi=150)
+    plt.savefig("Tests_Diagram/test8_correctness.png", dpi=150)
     plt.close()
-    print("\nSaved: Table/Tests_Diagram/test8_correctness.png")
+    print("\nSaved: Tests_Diagram/test8_correctness.png")
 
 
 if __name__ == "__main__":

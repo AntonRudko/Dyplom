@@ -110,9 +110,9 @@ def run():
     ax.legend()
 
     plt.tight_layout()
-    plt.savefig("Table/Tests_Diagram/test1_exponential_blowup.png", dpi=150)
+    plt.savefig("Tests_Diagram/test1_exponential_blowup.png", dpi=150)
     plt.close()
-    print("\nSaved: Table/Tests_Diagram/test1_exponential_blowup.png")
+    print("\nSaved: Tests_Diagram/test1_exponential_blowup.png")
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ ALPHABET = {"0", "1", "2"}
 SAMPLES = 5
 REPEATS = 5
 
-OUTPUT_DIR = "Table/Hitmaps"
+OUTPUT_DIR = "Hitmaps"
 
 
 # ── Вимірювання ───────────────────────────────────────────────

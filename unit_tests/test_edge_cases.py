@@ -14,8 +14,8 @@ from Algoritms.transset import determinize_transset
 from Algoritms.lazy_subset import determinize_lazy
 from Algoritms.class_dfa_nfa import NFA
 
-from helpers.dfa_helpers import run_dfa, run_nfa, gen_systematic_words
-from helpers.equivalence import check_language_equivalence_by_words
+from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_systematic_words
+from unit_tests.helpers.equivalence import check_language_equivalence_by_words
 
 
 ALGORITHMS = [
