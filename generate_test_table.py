@@ -13,7 +13,6 @@ import traceback
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import numpy as np
 
 # ── Збір тестів ────────────────────────────────────────────────────
@@ -82,7 +81,7 @@ EPSILON_ALGOS = ["Subset (ε)", "Brzozowski (ε)", "Transset (ε)", "Lazy (ε)"]
 # Функція повертає dict { алгоритм: True/False }
 
 
-def _run_safe(func, algo_name):
+def _run_safe(func, _algo_name):
     """Запуск з перехопленням винятків."""
     try:
         return func()

@@ -3,7 +3,6 @@ from Analize.words import *
 from Analize.word_check import run_words
 from Analize.table_visualizer import visualize_nfa_dfa
 from Analize.graph_visualizer import visualize_automaton_graph
-from Analize.simple_benchmark import benchmark_random_determinization
 
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
@@ -63,4 +62,3 @@ if __name__ == '__main__':
     visualize_automaton_graph(eps_dfa3, filename='Table/epsilon_graphs/transset_graph')
     visualize_automaton_graph(eps_dfa5, filename='Table/epsilon_graphs/lazy_subset_graph')
 
-    # benchmark_random_determinization()

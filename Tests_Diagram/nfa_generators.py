@@ -6,7 +6,25 @@
 """
 
 import random
+import time
+import tracemalloc
 from Algoritms.class_dfa_nfa import NFA
+
+
+def measure(alg, nfa, repeats):
+    total = 0.0
+    for _ in range(repeats):
+        start = time.perf_counter()
+        alg(nfa)
+        total += time.perf_counter() - start
+    avg_t = total / repeats
+
+    tracemalloc.start()
+    dfa, ops = alg(nfa)
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    return avg_t, peak / 1024, len(dfa.states), ops
 
 
 def gen_nth_from_last(n):

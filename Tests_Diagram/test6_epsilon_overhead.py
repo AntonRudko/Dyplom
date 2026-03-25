@@ -11,11 +11,9 @@
 - Розмір DFA може зменшитися (ε-переходи зливають стани)
 """
 
-import time
-import tracemalloc
 import matplotlib.pyplot as plt
 
-from Tests_Diagram.nfa_generators import gen_epsilon_chain
+from Tests_Diagram.nfa_generators import gen_epsilon_chain, measure
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
@@ -33,21 +31,6 @@ EPSILON_COUNTS = [0, 2, 5, 8, 12, 18]
 SAMPLES = 2
 REPEATS = 3
 
-
-def measure(alg, nfa, repeats):
-    total = 0.0
-    for _ in range(repeats):
-        start = time.perf_counter()
-        alg(nfa)
-        total += time.perf_counter() - start
-    avg_t = total / repeats
-
-    tracemalloc.start()
-    dfa, ops = alg(nfa)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-
-    return avg_t, peak / 1024, len(dfa.states), ops
 
 
 def run():

@@ -10,11 +10,9 @@
 - Всі алгоритми дають 2^n станів (неможливо зменшити)
 """
 
-import time
-import tracemalloc
 import matplotlib.pyplot as plt
 
-from Tests_Diagram.nfa_generators import gen_nth_from_last
+from Tests_Diagram.nfa_generators import gen_nth_from_last, measure
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
@@ -30,21 +28,6 @@ ALGORITHMS = [
 SIZES = [4, 5, 6, 7, 8, 9, 10]
 REPEATS = 5
 
-
-def measure(alg, nfa, repeats):
-    total = 0.0
-    for _ in range(repeats):
-        start = time.perf_counter()
-        alg(nfa)
-        total += time.perf_counter() - start
-    avg_t = total / repeats
-
-    tracemalloc.start()
-    dfa, ops = alg(nfa)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-
-    return avg_t, peak / 1024, len(dfa.states), ops
 
 
 def run():

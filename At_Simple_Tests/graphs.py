@@ -45,18 +45,6 @@ def gen_nfa(n, alphabet, p):
 
     return NFA(states, alphabet, tr, start, acc)
 
-def height_nfa(n):
-    states = {f"q{i}" for i in range(n)}
-    start = "q0"
-    acc = {f"q{n-1}"}
-    tr = {}
-    alphabet = {"0", "1"}
-    for i in range(n-1):
-        tr[(f"q{i}", "0")] = {f"q{i+1}"}
-    for i in range(n):
-        tr[(f"q{i}", "1")] = {f"q0"}
-    return NFA(states, alphabet, tr, start, acc)
-
 def avg_time(alg, nfa, r):
     t = 0
     for _ in range(r):

@@ -11,11 +11,9 @@
 - Розмір DFA зростає з nd
 """
 
-import time
-import tracemalloc
 import matplotlib.pyplot as plt
 
-from Tests_Diagram.nfa_generators import gen_variable_nondet
+from Tests_Diagram.nfa_generators import gen_variable_nondet, measure
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
@@ -34,21 +32,6 @@ NONDET_FRACTIONS = [0.0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5]
 SAMPLES = 2
 REPEATS = 3
 
-
-def measure(alg, nfa, repeats):
-    total = 0.0
-    for _ in range(repeats):
-        start = time.perf_counter()
-        alg(nfa)
-        total += time.perf_counter() - start
-    avg_t = total / repeats
-
-    tracemalloc.start()
-    dfa, ops = alg(nfa)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-
-    return avg_t, peak / 1024, len(dfa.states), ops
 
 
 def run():
