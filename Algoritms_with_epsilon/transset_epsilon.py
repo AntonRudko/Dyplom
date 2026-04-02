@@ -1,10 +1,11 @@
 from collections import deque
 from Algoritms.class_dfa_nfa import DFA
-from Algoritms_with_epsilon.epsilon_closure import epsilon_closure
+from Algoritms_with_epsilon.epsilon_closure import epsilon_closure, build_epsilon_table
 
 
 def determinize_transset_epsilon(nfa):
     merges_count = 0
+    eps_table = build_epsilon_table(nfa.states, nfa.transitions)
     # Побудова trans_by_state без ε-переходів
     trans_by_state = {s: set() for s in nfa.states}
     for (s, a), targets in nfa.transitions.items():
@@ -44,7 +45,7 @@ def determinize_transset_epsilon(nfa):
         return name, True
 
     # Стартовий стан = ε-замикання стартового стану
-    start_closure = epsilon_closure({nfa.start_state}, nfa.transitions)
+    start_closure = epsilon_closure({nfa.start_state}, nfa.transitions, eps_table)
     start_tuple = make_tuple_from_states(start_closure)
     start_name, _ = register_tuple(start_tuple)
 
@@ -68,7 +69,7 @@ def determinize_transset_epsilon(nfa):
                 next_b = False
             else:
                 # Застосовуємо ε-замикання до цільових станів
-                closed = epsilon_closure(target_states, nfa.transitions)
+                closed = epsilon_closure(target_states, nfa.transitions, eps_table)
                 combined_T = set()
                 next_b = False
                 for p in closed:

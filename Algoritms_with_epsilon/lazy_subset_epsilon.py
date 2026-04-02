@@ -1,5 +1,5 @@
 from Algoritms.class_dfa_nfa import DFA
-from Algoritms_with_epsilon.epsilon_closure import epsilon_closure
+from Algoritms_with_epsilon.epsilon_closure import epsilon_closure, build_epsilon_table
 
 
 def determinize_lazy_epsilon(nfa):
@@ -11,6 +11,7 @@ def determinize_lazy_epsilon(nfa):
     """
     alphabet = sorted(sym for sym in nfa.alphabet if sym != "")
     transitions_computed = 0
+    eps_table = build_epsilon_table(nfa.states, nfa.transitions)
 
     subset_to_name = {}
     counter = [0]
@@ -31,7 +32,7 @@ def determinize_lazy_epsilon(nfa):
             for s in subset:
                 nxt |= nfa.transitions.get((s, symbol), set())
             if nxt:
-                nxt = epsilon_closure(nxt, nfa.transitions)
+                nxt = epsilon_closure(nxt, nfa.transitions, eps_table)
                 cache[key] = nxt
             else:
                 cache[key] = None
@@ -39,7 +40,7 @@ def determinize_lazy_epsilon(nfa):
         return cache[key]
 
     # --- Матеріалізація через lazy DFS ---
-    start_subset = epsilon_closure({nfa.start_state}, nfa.transitions)
+    start_subset = epsilon_closure({nfa.start_state}, nfa.transitions, eps_table)
     get_name(start_subset)
 
     visited = set()

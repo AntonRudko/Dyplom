@@ -11,7 +11,7 @@ Dyplom_Top/
 ├── Analize/                       # Аналіз, візуалізація, бенчмарки
 ├── Tests/                         # Бенчмарк-тести (8 сценаріїв)
 ├── unit_tests/                    # Unit-тести (~70 тестів)
-├── Table/                         # Вихідні файли (графи, таблиці, heatmap)
+├── Outputs/                       # Вихідні файли (графи, таблиці, heatmap)
 ├── At_Tests/                      # Додаткові графіки
 ├── main.py                        # Точка входу
 └── difficulties.md                # Теоретичний аналіз алгоритмів
@@ -57,7 +57,7 @@ DFA: states, alphabet, transitions {(state, symbol): state},  start_state, accep
 | `nfa.py` | Предвизначені тестові НКА (nfa_1..5, nfa_large_1..5, nfa_epsilon) |
 | `graph_visualizer.py` | Граф автомата (Graphviz) |
 | `table_visualizer.py` | Таблиця переходів (PNG) |
-| `heatmap_comparison.py` | Теплові карти порівняння алгоритмів |
+| `Tests_Diagram/heatmap_comparison.py` | Теплові карти порівняння алгоритмів |
 | `simple_benchmark.py` | Бенчмарк на випадкових НКА (всі 5 алгоритмів) |
 | `word_check.py` | Перевірка прийняття слів |
 | `words.py` | Тестові набори слів |
@@ -83,10 +83,10 @@ DFA: states, alphabet, transitions {(state, symbol): state},  start_state, accep
 
 ~70 тестів: коректність кожного алгоритму, крос-алгоритмова еквівалентність, граничні випадки, мінімізація, ізоморфізм. Детальніше: `unit_tests/README.md`.
 
-## Вихідні файли (`Table/`)
+## Вихідні файли (`Outputs/`)
 
 ```
-Table/
+Outputs/
 ├── tables/           # Таблиці переходів (НКА та ДКА кожного алгоритму)
 ├── graphs/           # Графи автоматів
 ├── epsilon_tables/   # Таблиці для epsilon-автоматів
@@ -110,7 +110,7 @@ python -m Tests_Diagram.test2_density_impact
 python -m unittest discover -s unit_tests -p "test_*.py" -v
 
 # Heatmap порівняння
-python -m Analize.heatmap_comparison
+python -m Tests_Diagram.heatmap_comparison
 ```
 
 ## Залежності

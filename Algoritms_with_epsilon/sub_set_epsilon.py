@@ -1,6 +1,6 @@
 from collections import deque
 from Algoritms.class_dfa_nfa import DFA
-from Algoritms_with_epsilon.epsilon_closure import epsilon_closure
+from Algoritms_with_epsilon.epsilon_closure import epsilon_closure, build_epsilon_table
 
 
 def determinize_nfa_epsilon(nfa):
@@ -10,10 +10,12 @@ def determinize_nfa_epsilon(nfa):
     accept_names = set()
     subsets_processed = 0
 
+    eps_table = build_epsilon_table(nfa.states, nfa.transitions)
+
     def new_name():
         return f"q{len(subset_to_name)}"
 
-    start_subset = epsilon_closure({nfa.start_state}, nfa.transitions)
+    start_subset = epsilon_closure({nfa.start_state}, nfa.transitions, eps_table)
     start_name = new_name()
     subset_to_name[start_subset] = start_name
     state_names.add(start_name)
@@ -37,7 +39,7 @@ def determinize_nfa_epsilon(nfa):
             if not nxt:
                 continue
 
-            nxt = epsilon_closure(nxt, nfa.transitions)
+            nxt = epsilon_closure(nxt, nfa.transitions, eps_table)
 
             if nxt not in subset_to_name:
                 nm = new_name()

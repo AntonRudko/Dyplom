@@ -63,8 +63,6 @@ def run():
 
             print(f"  {name:12s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
 
-    nd_labels = [f"{nd:.0%}" for nd in NONDET_FRACTIONS]
-
     # --- Графіки ---
     fig, axes = plt.subplots(2, 2, figsize=(18, 10))
 

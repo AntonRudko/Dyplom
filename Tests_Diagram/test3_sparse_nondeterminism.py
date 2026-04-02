@@ -106,9 +106,9 @@ def run():
     ax.legend()
 
     plt.tight_layout()
-    plt.savefig("Table/Tests_Diagram/test3_sparse_nondeterminism.png", dpi=150)
+    plt.savefig("Outputs/Tests_Diagram/test3_sparse_nondeterminism.png", dpi=150)
     plt.close()
-    print("\nSaved: Table/Tests_Diagram/test3_sparse_nondeterminism.png")
+    print("\nSaved: Outputs/Tests_Diagram/test3_sparse_nondeterminism.png")
 
 
 if __name__ == "__main__":

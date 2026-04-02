@@ -7,7 +7,6 @@
 
 import sys
 import os
-import unittest
 import traceback
 
 import matplotlib
@@ -19,7 +18,6 @@ import numpy as np
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, PROJECT_ROOT)
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "unit_tests"))
 
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
@@ -31,7 +29,7 @@ from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
 from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
 from Algoritms.class_dfa_nfa import NFA, DFA
 
-from Analize.nfa import (
+from Analize.mocks.nfa import (
     nfa_1, nfa_2, nfa_3, nfa_4, nfa_5,
     nfa_large_1, nfa_large_2, nfa_large_3, nfa_large_4, nfa_large_5,
     nfa_epsilon,
@@ -40,13 +38,13 @@ from Tests_Diagram.nfa_generators import (
     gen_nth_from_last, gen_dense_random, gen_sparse_nfa,
     gen_multi_branch, gen_epsilon_chain,
 )
-from helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words, gen_systematic_words
-from helpers.equivalence import (
+from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words, gen_systematic_words
+from unit_tests.helpers.equivalence import (
     check_language_equivalence_by_words,
     check_dfa_equivalence_by_minimization,
 )
-from helpers.minimization import minimize_dfa
-from helpers.isomorphism import are_isomorphic
+from unit_tests.helpers.minimization import minimize_dfa
+from unit_tests.helpers.isomorphism import are_isomorphic
 
 
 # ── Алгоритми ──────────────────────────────────────────────────────
@@ -275,7 +273,7 @@ def test_exponential_blowup():
     n = 4
     nfa = gen_nth_from_last(n)
     for name in REGULAR_ALGOS:
-        def check(n_=name, expected=2**n):
+        def check(n_=name):
             dfa, _ = ALGO_FUNCS[n_](nfa)
             ok, _ = check_language_equivalence_by_words(nfa, dfa)
             return ok
@@ -537,5 +535,5 @@ if __name__ == "__main__":
 
     test_names, matrix = build_table()
 
-    out_path = os.path.join(PROJECT_ROOT, "Table", "test_results_table.png")
+    out_path = os.path.join(PROJECT_ROOT, "Outputs", "test_results_table.png")
     render_table_png(test_names, matrix, out_path)

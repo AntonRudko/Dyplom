@@ -13,7 +13,7 @@ from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
 from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
-from Analize.nfa import nfa_epsilon
+from Analize.mocks.nfa import nfa_epsilon
 from Tests_Diagram.nfa_generators import gen_epsilon_chain
 
 from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words, gen_systematic_words

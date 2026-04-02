@@ -1,15 +1,17 @@
 from collections import deque
 from Algoritms.class_dfa_nfa import DFA
-from Algoritms_with_epsilon.epsilon_closure import epsilon_closure
+from Algoritms_with_epsilon.epsilon_closure import epsilon_closure, build_epsilon_table
 
 
 def determinize_brz_epsilon(nfa):
     alphabet = {sym for sym in nfa.alphabet if sym != ""}
     total_iterations = [0]
 
+    eps_table = build_epsilon_table(nfa.states, nfa.transitions)
+
     def to_generic_from_nfa(nfa_obj):
         states = set(nfa_obj.states)
-        start_states = epsilon_closure({nfa_obj.start_state}, nfa_obj.transitions)
+        start_states = epsilon_closure({nfa_obj.start_state}, nfa_obj.transitions, eps_table)
         accept_states = set(nfa_obj.accept_states)
         trans = {}
         for (p, a), dsts in nfa_obj.transitions.items():
@@ -81,7 +83,7 @@ def determinize_brz_epsilon(nfa):
     for (p, a), dsts in A_trans.items():
         closed = set()
         for d in dsts:
-            closed |= epsilon_closure({d}, nfa.transitions)
+            closed |= epsilon_closure({d}, nfa.transitions, eps_table)
         eps_trans[(p, a)] = closed
     A_trans = eps_trans
 

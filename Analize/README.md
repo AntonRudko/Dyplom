@@ -1,6 +1,6 @@
 # Analize — інструменти аналізу та візуалізації
 
-Папка містить модулі для бенчмаркінгу алгоритмів детермінізації, візуалізації автоматів та перевірки коректності на конкретних словах.
+Папка містить допоміжні модулі для візуалізації автоматів, перевірки коректності на конкретних словах, мокові дані та простий консольний бенчмарк.
 
 ---
 
@@ -8,19 +8,19 @@
 
 ```
 Analize/
-├── nfa.py                — предвизначені тестові НКА
-├── words.py              — набори тестових слів
-├── word_check.py         — ручна перевірка слів на НКА/ДКА
-├── simple_benchmark.py   — бенчмарк на випадкових НКА (консольний)
-├── heatmap_comparison.py — генерація теплових карт порівняння алгоритмів
-├── graph_visualizer.py   — візуалізація графів автоматів (GraphViz)
-├── table_visualizer.py   — візуалізація таблиць переходів (matplotlib)
-└── Table/                — згенеровані heatmap-зображення (PNG)
+├── mocks/
+│   ├── nfa.py            — предвизначені тестові НКА
+│   └── words.py          — набори тестових слів
+├── tools/
+│   ├── word_check.py     — ручна перевірка слів на НКА/ДКА
+│   ├── graph_visualizer.py — візуалізація графів автоматів (GraphViz)
+│   └── table_visualizer.py — візуалізація таблиць переходів (matplotlib)
+└── simple_benchmark.py   — бенчмарк на випадкових НКА (консольний)
 ```
 
 ---
 
-## nfa.py — предвизначені тестові НКА
+## mocks/nfa.py — предвизначені тестові НКА
 
 Містить НКА різного розміру та складності для тестування та демонстрації:
 
@@ -39,7 +39,7 @@ Analize/
 
 ---
 
-## words.py — набори тестових слів
+## mocks/words.py — набори тестових слів
 
 Статичні списки слів для ручної перевірки:
 
@@ -52,7 +52,7 @@ Analize/
 
 ---
 
-## word_check.py — ручна перевірка слів
+## tools/word_check.py — ручна перевірка слів
 
 Три функції для прямого запуску автоматів на словах:
 
@@ -77,7 +77,7 @@ python -m Analize.simple_benchmark
 
 ---
 
-## graph_visualizer.py — графи автоматів (GraphViz)
+## tools/graph_visualizer.py — графи автоматів (GraphViz)
 
 **Функція:** `visualize_automaton_graph(automaton, filename)`
 
@@ -91,7 +91,7 @@ python -m Analize.simple_benchmark
 
 ---
 
-## table_visualizer.py — таблиці переходів (matplotlib)
+## tools/table_visualizer.py — таблиці переходів (matplotlib)
 
 **Функція:** `visualize_transition_table(automaton, filename)`
 
@@ -103,12 +103,13 @@ python -m Analize.simple_benchmark
 
 ---
 
-## heatmap_comparison.py — теплові карти порівняння
+## Heatmap-модулі
 
-Головний модуль аналізу продуктивності. Генерує 7 теплових карт у папку `Table/`.
+Модулі побудови heatmap перенесені в `Tests_Diagram/`:
 
 ```bash
-python -m Analize.heatmap_comparison
+python -m Tests_Diagram.heatmap_comparison
+python -m Tests_Diagram.heatmap_algorithmic
 ```
 
 ### Параметри бенчмарку
@@ -123,7 +124,7 @@ python -m Analize.heatmap_comparison
 
 ## Опис згенерованих heatmap
 
-Всі зображення зберігаються у `Analize/Table/`.
+Всі зображення зберігаються у `Tests_Diagram/Hitmaps/`.
 
 ### 1. heatmap_time_by_density.png
 

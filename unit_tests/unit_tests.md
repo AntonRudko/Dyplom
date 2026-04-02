@@ -119,7 +119,7 @@ cd Dyplom_Top
 python3 generate_test_table.py
 ```
 
-Результат зберігається у `Table/test_results_table.png`.
+Результат зберігається у `Outputs/test_results_table.png`.
 
 ### Що містить таблиця
 
@@ -274,4 +274,4 @@ python3 generate_test_table.py
 
 Якщо `python3 -m unittest discover -s unit_tests -v` показує `OK` — детермінізація працює правильно для всіх 4 алгоритмів.
 
-Для візуального зведення запустіть `python3 generate_test_table.py` — результат у `Table/test_results_table.png`.
+Для візуального зведення запустіть `python3 generate_test_table.py` — результат у `Outputs/test_results_table.png`.

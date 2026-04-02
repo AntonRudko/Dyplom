@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import networkx as nx
 
-from Algoritms.class_dfa_nfa import NFA, DFA
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
@@ -32,7 +31,7 @@ from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
 from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
 
-from Analize.nfa import nfa_1, nfa_epsilon
+from Analize.mocks.nfa import nfa_test1, nfa_epsilon
 from Tests_Diagram.nfa_generators import gen_nth_from_last
 
 
@@ -282,17 +281,17 @@ def part1_language_equivalence():
         ("Lazy",       determinize_lazy),
     ]
 
-    words = gen_words(nfa_1.alphabet, count=20, max_len=14)
+    words = gen_words(nfa_test1.alphabet, count=20, max_len=14)
     # Обмежуємо до 15 слів для читабельності
     words = words[:15]
 
     for alg_name, alg_func in algorithms:
-        dfa, _ = alg_func(nfa_1)
+        dfa, _ = alg_func(nfa_test1)
 
         print(f"\n=== Мовна еквівалентність: nfa_1 → {alg_name} ===")
         match_count = 0
         for word in words:
-            nfa_res = run_nfa(nfa_1, word)
+            nfa_res = run_nfa(nfa_test1, word)
             dfa_res = run_dfa(dfa, word)
             match = nfa_res == dfa_res
             if match:
@@ -345,7 +344,7 @@ def part2_structural_isomorphism():
     print("  ЧАСТИНА 2: СТРУКТУРНА ІЗОМОРФНІСТЬ")
     print("=" * 70)
 
-    OUTPUT_DIR = "Table/Visual_Correctness"
+    OUTPUT_DIR = "Outputs/Visual_Correctness"
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     nfa = gen_nth_from_last(3)
@@ -582,5 +581,5 @@ if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("  Готово!")
     print("  Консольний вивід — зробіть скріншот для звіту")
-    print("  Графічні файли збережено в Table/Visual_Correctness/")
+    print("  Графічні файли збережено в Outputs/Visual_Correctness/")
     print("=" * 70)

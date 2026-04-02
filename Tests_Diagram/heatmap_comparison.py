@@ -9,7 +9,7 @@ Heatmap порівняння алгоритмів детермінізації.
 Додатково: матриця попарного порівняння «алгоритм A швидший за B на X%».
 
 Запуск:
-    python -m Analize.heatmap_comparison
+    python -m Tests_Diagram.heatmap_comparison
 """
 
 import time

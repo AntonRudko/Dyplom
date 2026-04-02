@@ -25,7 +25,7 @@ python -m unittest discover -s unit_tests -p "test_*.py" -v
 python -m unittest unit_tests.test_subset -v
 
 # Heatmap comparison
-python -m Analize.heatmap_comparison
+python -m Tests_Diagram.heatmap_comparison
 ```
 
 ## Dependencies
@@ -79,7 +79,7 @@ Tests run from the `unit_tests/` directory; helpers are imported as `from helper
 
 ### Outputs
 
-- `Table/tables/` — transition table PNGs
-- `Table/graphs/` — automaton graph PNGs (Graphviz)
-- `Table/epsilon_tables/`, `Table/epsilon_graphs/` — epsilon variants
+- `Outputs/tables/` — transition table PNGs
+- `Outputs/graphs/` — automaton graph PNGs (Graphviz)
+- `Outputs/epsilon_tables/`, `Outputs/epsilon_graphs/` — epsilon variants
 - `At_Simple_Tests/Graphs/` — benchmark comparison plots

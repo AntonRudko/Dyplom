@@ -16,7 +16,7 @@ from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
 from Algoritms.lazy_subset import determinize_lazy
 from Algoritms.class_dfa_nfa import NFA
-from Analize.nfa import (
+from Analize.mocks.nfa import (
     nfa_1, nfa_2, nfa_3, nfa_4, nfa_5,
     nfa_large_1, nfa_large_2, nfa_large_3, nfa_large_4, nfa_large_5,
 )
