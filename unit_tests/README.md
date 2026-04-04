@@ -12,7 +12,6 @@ unit_tests/
   test_subset.py           # Subset Construction tests
   test_brzozowski.py       # Brzozowski algorithm tests
   test_transset.py         # Transset algorithm tests
-  test_qsc.py              # Quick Subset Construction tests
   test_lazy.py             # Lazy Subset Construction tests
   test_epsilon_variants.py # Epsilon-transition algorithm tests
   test_cross_algorithm.py  # Cross-algorithm equivalence (key file)
@@ -51,14 +50,13 @@ unit_tests/
 | `test_subset.py` | 9 | Subset Construction: structure, determinism, language, blowup |
 | `test_brzozowski.py` | 8 | Brzozowski: structure, language, minimality |
 | `test_transset.py` | 8 | Transset: structure, language, dead states |
-| `test_qsc.py` | 8 | QSC: structure, language, singularities |
 | `test_lazy.py` | 10 | Lazy Subset: structure, language, equivalence with Subset |
-| `test_epsilon_variants.py` | 5 | All 5 epsilon algorithms, epsilon-only NFA |
-| `test_cross_algorithm.py` | 8 | Cross-algorithm equivalence (all 5), isomorphism |
-| `test_edge_cases.py` | 8 | Single state, no transitions, unreachable, etc. (all 5) |
+| `test_epsilon_variants.py` | 5 | All 4 epsilon algorithms, epsilon-only NFA |
+| `test_cross_algorithm.py` | 8 | Cross-algorithm equivalence (all 4), isomorphism |
+| `test_edge_cases.py` | 8 | Single state, no transitions, unreachable, etc. (all 4) |
 | `test_minimization.py` | 6 | Minimization correctness, isomorphism properties |
 
-**Total: ~70 tests**
+**Total: 65 tests** (verified `python -m unittest discover`)
 
 ## How to Run
 
@@ -79,16 +77,14 @@ python -m unittest unit_tests.test_subset.TestSubsetConstruction.test_nth_from_l
 - **Subset Construction** (`Algoritms/sub_set.py`) — standard power set construction
 - **Brzozowski** (`Algoritms/brzozowski.py`) — double reversal + determinization
 - **Transset** (`Algoritms/transset.py`) — behavioral signature merging
-- **QSC** (`Algoritms/quick_subset.py`) — preserves deterministic parts
 - **Lazy Subset** (`Algoritms/lazy_subset.py`) — on-demand transition caching (DFS)
 
 ### With Epsilon
 - **Subset + epsilon** (`Algoritms_with_epsilon/sub_set_epsilon.py`)
 - **Brzozowski + epsilon** (`Algoritms_with_epsilon/brzozowski_epsilon.py`)
 - **Transset + epsilon** (`Algoritms_with_epsilon/transset_epsilon.py`)
-- **QSC + epsilon** (`Algoritms_with_epsilon/quick_subset_epsilon.py`)
 - **Lazy + epsilon** (`Algoritms_with_epsilon/lazy_subset_epsilon.py`)
 
 ## NFA Sources
-- **Predefined:** `Analize/nfa.py` (nfa_1..5, nfa_large_1..5, nfa_epsilon)
-- **Generators:** `Tests/nfa_generators.py` (nth_from_last, dense, sparse, branch, epsilon_chain)
+- **Predefined:** `Analize/mocks/nfa.py` (nfa_1..5, nfa_large_1..5, nfa_test1, nfa_test2, nfa_epsilon, nfa_15_states)
+- **Generators:** `Tests_Diagram/nfa_generators.py` (nth_from_last, dense, sparse, branch, epsilon_chain)

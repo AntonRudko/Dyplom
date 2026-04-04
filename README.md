@@ -1,19 +1,23 @@
 # Порівняльний аналіз алгоритмів детермінізації НКА
 
-Дипломний проєкт: реалізація, тестування та бенчмаркінг 5-ти алгоритмів перетворення НКА в ДКА, включаючи варіанти з epsilon-переходами.
+Дипломний проєкт: реалізація, тестування та бенчмаркінг 4-х алгоритмів перетворення НКА в ДКА, включаючи варіанти з epsilon-переходами.
 
 ## Структура проєкту
 
 ```
 Dyplom_Top/
-├── Algoritms/                     # Основні алгоритми (5 шт.)
-├── Algoritms_with_epsilon/        # Epsilon-варіанти алгоритмів (5 шт.)
-├── Analize/                       # Аналіз, візуалізація, бенчмарки
-├── Tests/                         # Бенчмарк-тести (8 сценаріїв)
-├── unit_tests/                    # Unit-тести (~70 тестів)
+├── Algoritms/                     # Основні алгоритми (4 шт.)
+├── Algoritms_with_epsilon/        # Epsilon-варіанти алгоритмів (4 шт.)
+├── Analize/                       # Аналіз, візуалізація, моки, бенчмарки
+│   ├── mocks/                     #   Предвизначені НКА та тестові слова
+│   └── tools/                     #   Візуалізатори та перевірка слів
+├── Tests_Diagram/                 # Бенчмарк-тести (8 сценаріїв)
+├── unit_tests/                    # Unit-тести (65 тестів)
 ├── Outputs/                       # Вихідні файли (графи, таблиці, heatmap)
-├── At_Tests/                      # Додаткові графіки
-├── main.py                        # Точка входу
+├── At_Simple_Tests/               # Додаткові графіки
+├── main.py                        # Точка входу (візуалізація таблиць та графів)
+├── generate_test_table.py         # Генерація зведеної таблиці результатів тестів
+├── visual_correctness.py          # Візуалізація коректності (ізоморфізм, еквівалентність)
 └── difficulties.md                # Теоретичний аналіз алгоритмів
 ```
 
@@ -26,19 +30,17 @@ Dyplom_Top/
 | `sub_set.py` | Subset Construction | Стандартна побудова підмножин (baseline) | subsets_processed |
 | `brzozowski.py` | Brzozowski | Подвійне обернення + детермінізація, дає мінімальний ДКА | total_iterations |
 | `transset.py` | Transset | Злиття станів з однаковими поведінковими сигнатурами | merges_count |
-| `quick_subset.py` | QSC | Зберігає детерміновані частини, перебудовує лише недетерміновані | singularities_resolved |
 | `lazy_subset.py` | Lazy Subset | Лінива детермінізація з кешуванням переходів (DFS замість BFS) | transitions_computed |
 
 ### З epsilon (`Algoritms_with_epsilon/`)
 
-Ті ж 5 алгоритмів + обчислення epsilon-замикання (`epsilon_closure.py`):
+Ті ж 4 алгоритми + обчислення epsilon-замикання (`epsilon_closure.py`):
 
 | Файл | Алгоритм |
 |------|----------|
 | `sub_set_epsilon.py` | Subset Construction + epsilon |
 | `brzozowski_epsilon.py` | Brzozowski + epsilon |
 | `transset_epsilon.py` | Transset + epsilon |
-| `quick_subset_epsilon.py` | QSC + epsilon |
 | `lazy_subset_epsilon.py` | Lazy Subset + epsilon |
 
 ### Класи даних (`Algoritms/class_dfa_nfa.py`)
@@ -52,17 +54,16 @@ DFA: states, alphabet, transitions {(state, symbol): state},  start_state, accep
 
 ## Аналіз та візуалізація (`Analize/`)
 
-| Файл | Призначення |
+| Шлях | Призначення |
 |------|-------------|
-| `nfa.py` | Предвизначені тестові НКА (nfa_1..5, nfa_large_1..5, nfa_epsilon) |
-| `graph_visualizer.py` | Граф автомата (Graphviz) |
-| `table_visualizer.py` | Таблиця переходів (PNG) |
-| `Tests_Diagram/heatmap_comparison.py` | Теплові карти порівняння алгоритмів |
-| `simple_benchmark.py` | Бенчмарк на випадкових НКА (всі 5 алгоритмів) |
-| `word_check.py` | Перевірка прийняття слів |
-| `words.py` | Тестові набори слів |
+| `mocks/nfa.py` | Предвизначені тестові НКА (nfa_1..5, nfa_large_1..5, nfa_test1, nfa_test2, nfa_epsilon, nfa_15_states) |
+| `mocks/words.py` | Тестові набори слів |
+| `tools/graph_visualizer.py` | Граф автомата (Graphviz) |
+| `tools/table_visualizer.py` | Таблиця переходів (PNG) |
+| `tools/word_check.py` | Перевірка прийняття слів |
+| `simple_benchmark.py` | Бенчмарк на випадкових НКА (всі 4 алгоритми) |
 
-## Бенчмарк-тести (`Tests/`)
+## Бенчмарк-тести (`Tests_Diagram/`)
 
 | Файл | Що вимірює |
 |------|------------|
@@ -75,33 +76,43 @@ DFA: states, alphabet, transitions {(state, symbol): state},  start_state, accep
 | `test7_nondet_degree.py` | Ступінь недетермінізму |
 | `test8_correctness.py` | Коректність (всі алгоритми еквівалентні) |
 
-Всі бенчмарк-тести включають 5 алгоритмів (+ epsilon-варіанти в test6, test8).
+Всі бенчмарк-тести включають 4 алгоритми (+ epsilon-варіанти в test6, test8).
 
 Генератори НКА (`nfa_generators.py`): `gen_nth_from_last`, `gen_dense_random`, `gen_sparse_nfa`, `gen_multi_branch`, `gen_epsilon_chain`, `gen_variable_alphabet`, `gen_variable_nondet`.
 
 ## Unit-тести (`unit_tests/`)
 
-~70 тестів: коректність кожного алгоритму, крос-алгоритмова еквівалентність, граничні випадки, мінімізація, ізоморфізм. Детальніше: `unit_tests/README.md`.
+65 тестів: коректність кожного алгоритму, крос-алгоритмова еквівалентність, граничні випадки, мінімізація, ізоморфізм. Детальніше: `unit_tests/README.md`.
 
 ## Вихідні файли (`Outputs/`)
 
 ```
 Outputs/
-├── tables/           # Таблиці переходів (НКА та ДКА кожного алгоритму)
-├── graphs/           # Графи автоматів
-├── epsilon_tables/   # Таблиці для epsilon-автоматів
-├── epsilon_graphs/   # Графи для epsilon-автоматів
-└── heatmap_*.png     # Теплові карти порівняння
+├── tables/                # Таблиці переходів (НКА та ДКА кожного алгоритму)
+├── graphs/                # Графи автоматів
+├── epsilon_tables/        # Таблиці для epsilon-автоматів
+├── epsilon_graphs/        # Графи для epsilon-автоматів
+├── Visual_Correctness/    # Ізоморфізм графів та матриці порівнянь
+└── test_results_table.png # Зведена таблиця результатів тестів
 ```
 
 ## Як запускати
 
 ```bash
-# Основна демонстрація (таблиці, графи, бенчмарк)
+# Основна демонстрація (таблиці, графи)
 python main.py
 
-# Всі бенчмарк-тести
+# Візуалізація коректності (еквівалентність мов + ізоморфізм)
+python visual_correctness.py
+
+# Генерація зведеної таблиці тестів (PNG)
+python generate_test_table.py
+
+# Всі бенчмарк-тести (базові алгоритми)
 python -m Tests_Diagram.run_all
+
+# Всі бенчмарк-тести (epsilon-варіанти)
+python -m Tests_Diagram.run_all_epsilon
 
 # Окремий бенчмарк-тест
 python -m Tests_Diagram.test2_density_impact

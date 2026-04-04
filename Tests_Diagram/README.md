@@ -9,14 +9,21 @@
 ```bash
 cd Dyplom_Top
 
-# Усі 8 тестів
+# Усі 8 базових тестів
 python -m Tests_Diagram.run_all
+
+# Усі epsilon-тести
+python -m Tests_Diagram.run_all_epsilon
 
 # Тільки конкретні тести (наприклад, 1 і 3)
 python -m Tests_Diagram.run_all 1 3
 
 # Окремий тест
 python -m Tests_Diagram.test1_exponential_blowup
+
+# Heatmap-порівняння
+python -m Tests_Diagram.heatmap_comparison
+python -m Tests_Diagram.heatmap_algorithmic
 ```
 
 ---
@@ -25,16 +32,22 @@ python -m Tests_Diagram.test1_exponential_blowup
 
 ```
 Tests_Diagram/
-├── run_all.py                     — запуск усіх тестів
+├── run_all.py                     — запуск усіх базових тестів
+├── run_all_epsilon.py             — запуск усіх epsilon-тестів
 ├── nfa_generators.py              — генератори спеціальних НКА
+├── heatmap_comparison.py          — heatmap-порівняння (щільність x розмір)
+├── heatmap_algorithmic.py         — алгоритмічні heatmap-порівняння
 ├── test1_exponential_blowup.py    — worst-case: nth-from-last
 ├── test2_density_impact.py        — вплив щільності переходів
 ├── test3_sparse_nondeterminism.py — переважно детерміновані НКА
 ├── test4_branch_structure.py      — паралельні гілки
 ├── test5_alphabet_size.py         — вплив розміру алфавіту
-├── test6_epsilon_overhead.py      — overhead ε-переходів
+├── test6_epsilon_overhead.py      — overhead e-переходів
 ├── test7_nondet_degree.py         — змінний ступінь недетермінізму
-└── test8_correctness.py           — верифікація коректності
+├── test8_correctness.py           — верифікація коректності
+├── Hitmaps/                       — згенеровані heatmap-зображення
+├── Tests_Diagram/                 — згенеровані графіки базових тестів
+└── Tests_Diagram_Epsilon/         — згенеровані графіки epsilon-тестів
 ```
 
 ---
