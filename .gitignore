@@ -27,5 +27,4 @@ Analize/Table/
 # Graphviz intermediate files
 *.gv
 *.dot
-
-.png
+*.png
