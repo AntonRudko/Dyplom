@@ -12,7 +12,7 @@ from Algoritms.class_dfa_nfa import NFA
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
+from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 from Analize.mocks.nfa import nfa_epsilon
 from Tests_Diagram.nfa_generators import gen_epsilon_chain
 
@@ -26,7 +26,7 @@ class TestEpsilonVariants(unittest.TestCase):
         ("SubsetEps", determinize_nfa_epsilon),
         ("BrzEps", determinize_brz_epsilon),
         ("TranssetEps", determinize_transset_epsilon),
-        ("LazyEps", determinize_lazy_epsilon),
+        ("QSCEps", determinize_qsc_epsilon),
     ]
 
     def test_predefined_epsilon_nfa_all_algorithms(self):

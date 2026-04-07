@@ -16,13 +16,13 @@ from Tests_Diagram.nfa_generators import gen_nth_from_last, measure
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.lazy_subset import determinize_lazy
+from Algoritms.qsc import determinize_qsc
 
 ALGORITHMS = [
     ("Subset",     determinize_nfa,  "ro-"),
     ("Brzozowski", determinize_brz,  "ms-"),
     ("Transset",   determinize_transset, "b^-"),
-    ("Lazy",       determinize_lazy, "cv-"),
+    ("QSC",        determinize_qsc, "gD-"),
 ]
 
 SIZES = [4, 5, 6, 7, 8, 9, 10]

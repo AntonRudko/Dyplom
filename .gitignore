@@ -16,14 +16,16 @@ env/
 .vscode/
 
 # Generated output
-Table/tables/
-Table/graphs/
-Table/epsilon_tables/
-Table/epsilon_graphs/
-Table/heatmap_*.png
+At_Simple_Tests/Table/tables/
+At_Simple_Tests/Table/graphs/
+At_Simple_Tests/Table/epsilon_tables/
+At_Simple_Tests/Table/epsilon_graphs/
+At_Simple_Tests/Table/heatmap_*.png
 At_Simple_Tests/Graphs/
 Analize/Table/
 
 # Graphviz intermediate files
 *.gv
 *.dot
+
+.png

@@ -14,6 +14,7 @@
 """
 
 import os
+import random
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,7 +24,7 @@ from Tests_Diagram.nfa_generators import gen_nth_from_last, gen_dense_random
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.lazy_subset import determinize_lazy
+from Algoritms.qsc import determinize_qsc
 
 # ── Конфігурація ────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ ALGORITHMS = [
     ("Subset",     determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset",   determinize_transset),
-    ("Lazy",       determinize_lazy),
+    ("QSC",        determinize_qsc),
 ]
 ALG_NAMES = [name for name, _ in ALGORITHMS]
 
@@ -296,6 +297,7 @@ def plot_time_per_state(cost_per_state):
 # ── Головна функція ──────────────────────────────────────────────────────────
 
 def run():
+    random.seed(53)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     print("=" * 65)

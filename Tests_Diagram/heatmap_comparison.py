@@ -12,6 +12,7 @@ Heatmap порівняння алгоритмів детермінізації.
     python -m Tests_Diagram.heatmap_comparison
 """
 
+import random
 import time
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,7 +23,7 @@ from Tests_Diagram.nfa_generators import gen_dense_random, gen_sparse_nfa
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.lazy_subset import determinize_lazy
+from Algoritms.qsc import determinize_qsc
 
 # ── Конфігурація ──────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ ALGORITHMS = [
     ("Subset",     determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset",   determinize_transset),
-    ("Lazy",       determinize_lazy),
+    ("QSC",        determinize_qsc),
 ]
 
 ALG_NAMES = [name for name, _ in ALGORITHMS]
@@ -352,6 +353,7 @@ def plot_full_grid_heatmap(grids, filename_prefix):
 
 def run():
     """Запуск повного набору heatmap-порівнянь."""
+    random.seed(53)
     import os
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 

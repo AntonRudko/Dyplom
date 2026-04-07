@@ -11,19 +11,20 @@
 - Розмір DFA може зменшитися (ε-переходи зливають стани)
 """
 
+import random
 import matplotlib.pyplot as plt
 
 from Tests_Diagram.nfa_generators import gen_epsilon_chain, measure
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
+from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 ALGORITHMS = [
     ("Subset+ε",     determinize_nfa_epsilon,      "ro-"),
     ("Brzozowski+ε", determinize_brz_epsilon,      "ms-"),
     ("Transset+ε",   determinize_transset_epsilon,  "b^-"),
-    ("Lazy+ε",       determinize_lazy_epsilon,      "cv-"),
+    ("QSC+ε",        determinize_qsc_epsilon,       "gD-"),
 ]
 
 NUM_STATES = 15
@@ -34,6 +35,7 @@ REPEATS = 3
 
 
 def run():
+    random.seed(53)
     results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
                for name, _, _ in ALGORITHMS}
 

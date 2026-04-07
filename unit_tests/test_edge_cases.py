@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.lazy_subset import determinize_lazy
+from Algoritms.qsc import determinize_qsc
 from Algoritms.class_dfa_nfa import NFA
 
 from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_systematic_words
@@ -22,7 +22,7 @@ ALGORITHMS = [
     ("Subset", determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset", determinize_transset),
-    ("Lazy", determinize_lazy),
+    ("QSC", determinize_qsc),
 ]
 
 

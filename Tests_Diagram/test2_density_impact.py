@@ -10,19 +10,20 @@
 - Transset: менше станів ніж Subset при будь-якій щільності
 """
 
+import random
 import matplotlib.pyplot as plt
 
 from Tests_Diagram.nfa_generators import gen_dense_random, measure
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.lazy_subset import determinize_lazy
+from Algoritms.qsc import determinize_qsc
 
 ALGORITHMS = [
     ("Subset",     determinize_nfa,  "ro-"),
     ("Brzozowski", determinize_brz,  "ms-"),
     ("Transset",   determinize_transset, "b^-"),
-    ("Lazy",       determinize_lazy, "cv-"),
+    ("QSC",        determinize_qsc, "gD-"),
 ]
 
 NUM_STATES = 30
@@ -34,6 +35,7 @@ REPEATS = 5
 
 
 def run():
+    random.seed(53)
     results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
                for name, _, _ in ALGORITHMS}
 

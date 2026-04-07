@@ -15,13 +15,13 @@ from Tests_Diagram.nfa_generators import gen_epsilon_chain, measure
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
+from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 ALGORITHMS = [
     ("Subset+ε",     determinize_nfa_epsilon,      "ro-"),
     ("Brzozowski+ε", determinize_brz_epsilon,      "ms-"),
     ("Transset+ε",   determinize_transset_epsilon,  "b^-"),
-    ("Lazy+ε",       determinize_lazy_epsilon,      "cv-"),
+    ("QSC+ε",        determinize_qsc_epsilon,       "gD-"),
 ]
 
 OUTPUT_DIR = "Tests_Diagram_Epsilon"
@@ -273,13 +273,13 @@ def run_test4():
     from Algoritms.sub_set import determinize_nfa
     from Algoritms.brzozowski import determinize_brz
     from Algoritms.transset import determinize_transset
-    from Algoritms.lazy_subset import determinize_lazy
+    from Algoritms.qsc import determinize_qsc
 
     BASE_ALGORITHMS = [
         ("Subset",     determinize_nfa),
         ("Brzozowski", determinize_brz),
         ("Transset",   determinize_transset),
-        ("Lazy",       determinize_lazy),
+        ("QSC",        determinize_qsc),
     ]
 
     SIZES = [8, 10, 12, 15, 18, 20, 25]
@@ -336,7 +336,7 @@ def run_test4():
         ("Subset", "Subset+ε"),
         ("Brzozowski", "Brzozowski+ε"),
         ("Transset", "Transset+ε"),
-        ("Lazy", "Lazy+ε"),
+        ("QSC", "QSC+ε"),
     ]
     for idx, (base_name, eps_name) in enumerate(alg_pairs):
         ratios = []
@@ -535,6 +535,7 @@ TESTS = {
 
 
 def main():
+    random.seed(53)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     selected = sys.argv[1:] if len(sys.argv) > 1 else TESTS.keys()

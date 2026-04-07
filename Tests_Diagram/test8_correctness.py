@@ -23,24 +23,24 @@ from Tests_Diagram.nfa_generators import (
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.lazy_subset import determinize_lazy
+from Algoritms.qsc import determinize_qsc
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.lazy_subset_epsilon import determinize_lazy_epsilon
+from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 ALGORITHMS = [
     ("Subset",     determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset",   determinize_transset),
-    ("Lazy",       determinize_lazy),
+    ("QSC",        determinize_qsc),
 ]
 
 ALGORITHMS_EPS = [
     ("Subset+ε",     determinize_nfa_epsilon),
     ("Brzozowski+ε", determinize_brz_epsilon),
     ("Transset+ε",   determinize_transset_epsilon),
-    ("Lazy+ε",       determinize_lazy_epsilon),
+    ("QSC+ε",        determinize_qsc_epsilon),
 ]
 
 NUM_WORDS = 100
@@ -126,6 +126,7 @@ def verify_one(label, nfa, algorithms, words):
 
 
 def run():
+    random.seed(53)
     print("=" * 60)
     print("  Test 8: Correctness Verification")
     print("=" * 60)
