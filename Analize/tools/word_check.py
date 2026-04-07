@@ -17,7 +17,8 @@ def run_nfa(nfa, word):
         current = next_states
     return any(s in nfa.accept_states for s in current)
 
-def run_words(nfa, dfa, words):
+def run_words(nfa, dfa, words, method_name="unknown"):
+    print(f"\n=== Determinization method: {method_name} ===")
     equal = True
     for w in words:
         nfa_res = run_nfa(nfa, w)
