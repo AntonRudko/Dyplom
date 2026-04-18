@@ -34,10 +34,17 @@ def check_dfa_equivalence_by_minimization(dfa1, dfa2):
     """
     Check that two DFAs are equivalent by minimizing both and checking isomorphism.
 
+    After canonical minimization, a DFA accepting the empty language has
+    zero states (dead-equivalence class removed). Handle that case explicitly.
+
     Returns True if the minimized DFAs are isomorphic.
     """
     min1 = minimize_dfa(dfa1)
     min2 = minimize_dfa(dfa2)
+    if not min1.states and not min2.states:
+        return True
+    if len(min1.states) != len(min2.states):
+        return False
     return are_isomorphic(min1, min2)
 
 

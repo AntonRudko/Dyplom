@@ -13,24 +13,24 @@
 import matplotlib.pyplot as plt
 
 from Tests_Diagram.nfa_generators import gen_nth_from_last, measure
+from Tests_Diagram.cache import load_cache, save_cache, BASE_SOURCES
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 
 ALGORITHMS = [
     ("Subset",     determinize_nfa,  "ro-"),
     ("Brzozowski", determinize_brz,  "ms-"),
     ("Transset",   determinize_transset, "b^-"),
-    ("QSC",        determinize_qsc, "gD-"),
 ]
 
 SIZES = [4, 5, 6, 7, 8, 9, 10]
 REPEATS = 5
 
+_PARAMS = {"SIZES": SIZES, "REPEATS": REPEATS}
 
 
-def run():
+def _compute():
     results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []} for name, _, _ in ALGORITHMS}
 
     for n in SIZES:
@@ -45,57 +45,60 @@ def run():
             results[name]["ops"].append(ops)
             print(f"  {name:12s}: time={t:.4f}s  mem={m:.1f}KB  DFA states={s}  ops={ops}")
 
-    # --- Графіки ---
-    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
+    return results
 
-    ax = axes[0, 0]
+
+def _plot(results):
+    fig, ax = plt.subplots(figsize=(9, 6))
     for name, _, style in ALGORITHMS:
         ax.plot(SIZES, results[name]["time"], style, label=name, markersize=6)
-    ax.set_xlabel("NFA parameter n (states = n+1)")
-    ax.set_ylabel("Time (s)")
-    ax.set_title("Test 1: Exponential Blowup — Time")
+    ax.set_xlabel("Параметр n НСА (станів = n+1)")
+    ax.set_ylabel("Час (с)")
+    ax.set_title("Тест 1: Експоненційний вибух — Час")
     ax.set_yscale("log")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend()
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test1_exponential_blowup_time.png", dpi=150)
+    plt.close()
+    print("\nSaved: Tests_Diagram/test1_exponential_blowup_time.png")
 
-    # --- Графік 2: Пам'ять ---
-    ax = axes[0, 1]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for name, _, style in ALGORITHMS:
         ax.plot(SIZES, results[name]["mem"], style, label=name, markersize=6)
-    ax.set_xlabel("NFA parameter n (states = n+1)")
-    ax.set_ylabel("Peak RAM (KB)")
-    ax.set_title("Test 1: Exponential Blowup — Memory")
+    ax.set_xlabel("Параметр n НСА (станів = n+1)")
+    ax.set_ylabel("Пікова RAM (КБ)")
+    ax.set_title("Тест 1: Експоненційний вибух — Пам'ять")
     ax.set_yscale("log")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend()
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test1_exponential_blowup_memory.png", dpi=150)
+    plt.close()
+    print("Saved: Tests_Diagram/test1_exponential_blowup_memory.png")
 
-    # --- Графік 3: Розмір DFA ---
-    ax = axes[1, 0]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for name, _, style in ALGORITHMS:
         ax.plot(SIZES, results[name]["dfa_size"], style, label=name, markersize=6)
-    ax.plot(SIZES, [2**n for n in SIZES], "k--", label="2^n (theoretical)", alpha=0.5)
-    ax.set_xlabel("NFA parameter n (states = n+1)")
-    ax.set_ylabel("DFA states")
-    ax.set_title("Test 1: Exponential Blowup — DFA Size")
+    ax.plot(SIZES, [2**n for n in SIZES], "k--", label="2^n (теоретична межа)", alpha=0.5)
+    ax.set_xlabel("Параметр n НСА (станів = n+1)")
+    ax.set_ylabel("Станів ДСА")
+    ax.set_title("Тест 1: Експоненційний вибух — Розмір ДСА")
     ax.set_yscale("log")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend()
-
-    # --- Графік 4: Операції ---
-    ax = axes[1, 1]
-    for name, _, style in ALGORITHMS:
-        ax.plot(SIZES, results[name]["ops"], style, label=name, markersize=6)
-    ax.set_xlabel("NFA parameter n (states = n+1)")
-    ax.set_ylabel("Operations")
-    ax.set_title("Test 1: Exponential Blowup — Operations")
-    ax.set_yscale("log")
-    ax.grid(True, linestyle="--", alpha=0.4)
-    ax.legend()
-
     plt.tight_layout()
-    plt.savefig("Tests_Diagram/test1_exponential_blowup.png", dpi=150)
+    plt.savefig("Tests_Diagram/test1_exponential_blowup_dfa_size.png", dpi=150)
     plt.close()
-    print("\nSaved: Tests_Diagram/test1_exponential_blowup.png")
+    print("Saved: Tests_Diagram/test1_exponential_blowup_dfa_size.png")
+
+
+def run():
+    results = load_cache("test1", _PARAMS, BASE_SOURCES)
+    if results is None:
+        results = _compute()
+        save_cache("test1", _PARAMS, BASE_SOURCES, results)
+    _plot(results)
 
 
 if __name__ == "__main__":

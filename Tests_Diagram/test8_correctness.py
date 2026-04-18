@@ -1,7 +1,7 @@
 """
 Тест 8: Верифікація коректності алгоритмів.
 
-Перевіряє, що всі 4 алгоритми (з і без epsilon) дають
+Перевіряє, що всі алгоритми (з і без epsilon) дають
 еквівалентні ДКА — приймають однакову мову.
 
 Метод: генерація випадкових слів і перевірка, що всі ДКА
@@ -23,24 +23,20 @@ from Tests_Diagram.nfa_generators import (
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 ALGORITHMS = [
     ("Subset",     determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset",   determinize_transset),
-    ("QSC",        determinize_qsc),
 ]
 
 ALGORITHMS_EPS = [
     ("Subset+ε",     determinize_nfa_epsilon),
     ("Brzozowski+ε", determinize_brz_epsilon),
     ("Transset+ε",   determinize_transset_epsilon),
-    ("QSC+ε",        determinize_qsc_epsilon),
 ]
 
 NUM_WORDS = 100
@@ -202,9 +198,7 @@ def run():
     x = range(len(test_labels))
 
     # Графік 1: Blowup ratio (Subset DFA / NFA)
-    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
-
-    ax = axes[0]
+    fig, ax = plt.subplots(figsize=(10, 7))
     blowups = [
         all_sizes[i].get("Subset", all_nfa_sizes[i]) / all_nfa_sizes[i]
         if all_nfa_sizes[i] > 0 else 1
@@ -217,9 +211,13 @@ def run():
     ax.set_title("Test 8: State Blowup Ratio")
     ax.axhline(y=1, color="k", linestyle="--", alpha=0.3)
     ax.grid(True, linestyle="--", alpha=0.3, axis="y")
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test8_correctness_blowup.png", dpi=150)
+    plt.close()
+    print("\nSaved: Tests_Diagram/test8_correctness_blowup.png")
 
     # Графік 2: Коефіцієнт стиснення кожного алгоритму відносно Subset
-    ax = axes[1]
+    fig, ax = plt.subplots(figsize=(10, 7))
     other_algs = [n for n in alg_names if n != "Subset"]
     n_algs = len(other_algs)
     width = 0.8 / n_algs
@@ -242,11 +240,10 @@ def run():
     ax.axhline(y=1, color="k", linestyle="--", alpha=0.3)
     ax.grid(True, linestyle="--", alpha=0.3, axis="y")
     ax.legend(fontsize=7)
-
     plt.tight_layout()
-    plt.savefig("Tests_Diagram/test8_correctness.png", dpi=150)
+    plt.savefig("Tests_Diagram/test8_correctness_compression.png", dpi=150)
     plt.close()
-    print("\nSaved: Tests_Diagram/test8_correctness.png")
+    print("Saved: Tests_Diagram/test8_correctness_compression.png")
 
 
 if __name__ == "__main__":

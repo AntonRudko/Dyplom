@@ -15,16 +15,15 @@ import random
 import matplotlib.pyplot as plt
 
 from Tests_Diagram.nfa_generators import gen_epsilon_chain, measure
+from Tests_Diagram.cache import load_cache, save_cache, EPS_SOURCES
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 ALGORITHMS = [
     ("Subset+ε",     determinize_nfa_epsilon,      "ro-"),
     ("Brzozowski+ε", determinize_brz_epsilon,      "ms-"),
     ("Transset+ε",   determinize_transset_epsilon,  "b^-"),
-    ("QSC+ε",        determinize_qsc_epsilon,       "gD-"),
 ]
 
 NUM_STATES = 15
@@ -32,9 +31,16 @@ EPSILON_COUNTS = [0, 2, 5, 8, 12, 18]
 SAMPLES = 2
 REPEATS = 3
 
+_PARAMS = {
+    "NUM_STATES": NUM_STATES,
+    "EPSILON_COUNTS": EPSILON_COUNTS,
+    "SAMPLES": SAMPLES,
+    "REPEATS": REPEATS,
+    "SEED": 53,
+}
 
 
-def run():
+def _compute():
     random.seed(53)
     results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
                for name, _, _ in ALGORITHMS}
@@ -64,15 +70,17 @@ def run():
 
             print(f"  {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
 
-    # --- Графіки (bar chart для кращої читабельності дискретних значень ε) ---
-    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
+    return results
+
+
+def _plot(results):
     x_pos = range(len(EPSILON_COUNTS))
     x_labels = [str(e) for e in EPSILON_COUNTS]
     n_algs = len(ALGORITHMS)
     bar_width = 0.8 / n_algs
-    colors = ["#e74c3c", "#9b59b6", "#3498db", "#1abc9c"]
+    colors = ["#e74c3c", "#9b59b6", "#3498db"]
 
-    ax = axes[0, 0]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for idx, (name, _, _) in enumerate(ALGORITHMS):
         offset = (idx - n_algs / 2 + 0.5) * bar_width
         ax.bar([p + offset for p in x_pos], results[name]["time"], bar_width,
@@ -84,8 +92,12 @@ def run():
     ax.set_title(f"Test 6: Epsilon Overhead — Time (n={NUM_STATES})")
     ax.grid(True, linestyle="--", alpha=0.4, axis="y")
     ax.legend()
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test6_epsilon_overhead_time.png", dpi=150)
+    plt.close()
+    print("\nSaved: Tests_Diagram/test6_epsilon_overhead_time.png")
 
-    ax = axes[0, 1]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for idx, (name, _, _) in enumerate(ALGORITHMS):
         offset = (idx - n_algs / 2 + 0.5) * bar_width
         ax.bar([p + offset for p in x_pos], results[name]["mem"], bar_width,
@@ -97,8 +109,12 @@ def run():
     ax.set_title(f"Test 6: Epsilon Overhead — Memory (n={NUM_STATES})")
     ax.grid(True, linestyle="--", alpha=0.4, axis="y")
     ax.legend()
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test6_epsilon_overhead_memory.png", dpi=150)
+    plt.close()
+    print("Saved: Tests_Diagram/test6_epsilon_overhead_memory.png")
 
-    ax = axes[1, 0]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for idx, (name, _, _) in enumerate(ALGORITHMS):
         offset = (idx - n_algs / 2 + 0.5) * bar_width
         ax.bar([p + offset for p in x_pos], results[name]["dfa_size"], bar_width,
@@ -110,24 +126,18 @@ def run():
     ax.set_title(f"Test 6: Epsilon Overhead — DFA Size (n={NUM_STATES})")
     ax.grid(True, linestyle="--", alpha=0.4, axis="y")
     ax.legend()
-
-    ax = axes[1, 1]
-    for idx, (name, _, _) in enumerate(ALGORITHMS):
-        offset = (idx - n_algs / 2 + 0.5) * bar_width
-        ax.bar([p + offset for p in x_pos], results[name]["ops"], bar_width,
-               label=name, color=colors[idx], alpha=0.85)
-    ax.set_xticks(list(x_pos))
-    ax.set_xticklabels(x_labels)
-    ax.set_xlabel("Number of ε-transitions")
-    ax.set_ylabel("Operations")
-    ax.set_title(f"Test 6: Epsilon Overhead — Operations (n={NUM_STATES})")
-    ax.grid(True, linestyle="--", alpha=0.4, axis="y")
-    ax.legend()
-
     plt.tight_layout()
-    plt.savefig("Tests_Diagram/test6_epsilon_overhead.png", dpi=150)
+    plt.savefig("Tests_Diagram/test6_epsilon_overhead_dfa_size.png", dpi=150)
     plt.close()
-    print("\nSaved: Tests_Diagram/test6_epsilon_overhead.png")
+    print("Saved: Tests_Diagram/test6_epsilon_overhead_dfa_size.png")
+
+
+def run():
+    results = load_cache("test6", _PARAMS, EPS_SOURCES)
+    if results is None:
+        results = _compute()
+        save_cache("test6", _PARAMS, EPS_SOURCES, results)
+    _plot(results)
 
 
 if __name__ == "__main__":

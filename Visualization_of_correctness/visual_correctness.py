@@ -25,11 +25,9 @@ import networkx as nx
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 from Analize.mocks.nfa import nfa_test1, nfa_epsilon
 from Tests_Diagram.nfa_generators import gen_nth_from_last
@@ -278,7 +276,6 @@ def part1_language_equivalence():
         ("Subset",     determinize_nfa),
         ("Brzozowski", determinize_brz),
         ("Transset",   determinize_transset),
-        ("QSC",        determinize_qsc),
     ]
 
     words = gen_words(nfa_test1.alphabet, count=20, max_len=14)
@@ -309,7 +306,6 @@ def part1_language_equivalence():
         ("Subset+ε",     determinize_nfa_epsilon),
         ("Brzozowski+ε", determinize_brz_epsilon),
         ("Transset+ε",   determinize_transset_epsilon),
-        ("QSC+ε",        determinize_qsc_epsilon),
     ]
 
     words_eps = gen_words(nfa_epsilon.alphabet, count=20, max_len=14)
@@ -353,7 +349,6 @@ def part2_structural_isomorphism():
         ("Subset",     determinize_nfa),
         ("Brzozowski", determinize_brz),
         ("Transset",   determinize_transset),
-        ("QSC",        determinize_qsc),
     ]
 
     # Детермінізація → мінімізація → BFS-перейменування
@@ -397,14 +392,14 @@ def part2_structural_isomorphism():
 
     print(f"\n  All minimized DFAs are isomorphic ? {all_iso}")
 
-    # ── 2c: Графи мінімальних DFA (2x2) ──────────────────────────
-    fig, axes = plt.subplots(2, 2, figsize=(16, 14))
+    # ── 2c: Графи мінімальних DFA ──────────────────────────
+    fig, axes = plt.subplots(1, 3, figsize=(22, 8))
     fig.suptitle("Мінімізовані DFA: nth_from_last(3)\n"
                  "(всі графи мають бути ідентичні)",
                  fontsize=16, fontweight="bold", y=0.98)
 
     for idx, name in enumerate(alg_names):
-        ax = axes[idx // 2][idx % 2]
+        ax = axes[idx]
         m = minimized[name]
         alphabet = sorted(m.alphabet)
 

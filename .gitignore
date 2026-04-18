@@ -24,6 +24,9 @@ At_Simple_Tests/Table/heatmap_*.png
 At_Simple_Tests/Graphs/
 Analize/Table/
 
+# Benchmark cache
+Tests_Diagram/Cache/
+
 # Graphviz intermediate files
 *.gv
 *.dot

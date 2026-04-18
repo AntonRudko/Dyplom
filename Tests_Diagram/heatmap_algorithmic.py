@@ -24,7 +24,6 @@ from Tests_Diagram.nfa_generators import gen_nth_from_last, gen_dense_random
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 
 # ── Конфігурація ────────────────────────────────────────────────────────────
 
@@ -32,7 +31,6 @@ ALGORITHMS = [
     ("Subset",     determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset",   determinize_transset),
-    ("QSC",        determinize_qsc),
 ]
 ALG_NAMES = [name for name, _ in ALGORITHMS]
 

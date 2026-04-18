@@ -1,5 +1,10 @@
 """
-DFA minimization via partition refinement (Hopcroft-style).
+DFA minimization via partition refinement (Moore's algorithm).
+
+Canonical form: the input DFA is always completed with an explicit dead
+state before refinement, and the dead-equivalence class is removed after
+refinement. This guarantees that partial and total DFAs accepting the
+same language produce isomorphic minimal results.
 """
 
 from collections import deque
@@ -7,16 +12,16 @@ from collections import deque
 
 def minimize_dfa(dfa):
     """
-    Minimize a DFA using partition refinement.
+    Minimize a DFA using Moore's partition refinement algorithm.
 
     Steps:
     1. BFS for reachable states
-    2. Add dead state for totality
+    2. Always add an explicit dead state for totality
     3. Partition refinement {accept, non-accept} -> stable
     4. Build minimal DFA
-    5. Remove dead state (partial DFA compatible with Transset/Subset output)
+    5. Always remove the dead-equivalence class (canonical partial form)
 
-    Returns a new DFA-like object (namedtuple-style dict).
+    Returns a new DFA-like object.
     """
     # Filter alphabet (no epsilon)
     alphabet = sorted(sym for sym in dfa.alphabet if sym != "")
@@ -33,36 +38,27 @@ def minimize_dfa(dfa):
                 reachable.add(nxt)
                 queue.append(nxt)
 
-    states = reachable
-    accept = dfa.accept_states & states
+    accept = dfa.accept_states & reachable
+
+    # Step 2: Always add explicit dead state for canonical totality
+    DEAD = "__dead__"
+    states = reachable | {DEAD}
     non_accept = states - accept
 
-    # Step 2: Add dead state for totality
-    DEAD = "__dead__"
     total_transitions = {}
-    needs_dead = False
-
-    for s in states:
+    for s in reachable:
         for sym in alphabet:
             nxt = dfa.transitions.get((s, sym))
-            if nxt is not None and nxt in states:
+            if nxt is not None and nxt in reachable:
                 total_transitions[(s, sym)] = nxt
             else:
                 total_transitions[(s, sym)] = DEAD
-                needs_dead = True
-
-    if needs_dead:
-        states = states | {DEAD}
-        non_accept = non_accept | {DEAD}
-        for sym in alphabet:
-            total_transitions[(DEAD, sym)] = DEAD
+    for sym in alphabet:
+        total_transitions[(DEAD, sym)] = DEAD
 
     # Step 3: Partition refinement
     if not accept:
-        # All states are non-accepting -> single partition
         partition = [states]
-    elif not non_accept:
-        partition = [accept]
     else:
         partition = [accept, non_accept]
 
@@ -113,15 +109,14 @@ def minimize_dfa(dfa):
             target_group = state_to_group[total_transitions[(rep, sym)]]
             min_transitions[(i, sym)] = target_group
 
-    # Step 5: Remove dead state group
-    if needs_dead:
-        dead_group = state_to_group[DEAD]
-        min_states.discard(dead_group)
-        min_accept.discard(dead_group)
-        min_transitions = {
-            k: v for k, v in min_transitions.items()
-            if k[0] != dead_group and v != dead_group
-        }
+    # Step 5: Always remove dead-equivalence class (canonical partial form)
+    dead_group = state_to_group[DEAD]
+    min_states.discard(dead_group)
+    min_accept.discard(dead_group)
+    min_transitions = {
+        k: v for k, v in min_transitions.items()
+        if k[0] != dead_group and v != dead_group
+    }
 
     return MinimalDFA(
         states=min_states,

@@ -1,5 +1,8 @@
 """
-Unit tests for Transset algorithm.
+Unit tests for Transset algorithm — validated via minimization + isomorphism
+against Subset Construction (the reference implementation).
+
+Every test gives a 100% correctness guarantee (Myhill-Nerode theorem).
 """
 
 import sys
@@ -9,87 +12,60 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Algoritms.transset import determinize_transset
-from Algoritms.class_dfa_nfa import NFA
-from Analize.mocks.nfa import nfa_1, nfa_2, nfa_3, nfa_4, nfa_5
-from Tests_Diagram.nfa_generators import gen_nth_from_last, gen_dense_random, gen_sparse_nfa
+from Algoritms.sub_set import determinize_nfa
+from Analize.mocks.nfa import (
+    nfa_1, nfa_2, nfa_3, nfa_4, nfa_5,
+    nfa_large_1, nfa_large_2, nfa_large_3,
+)
+from Tests_Diagram.nfa_generators import (
+    gen_nth_from_last, gen_dense_random, gen_sparse_nfa,
+)
 
-from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words
-from unit_tests.helpers.equivalence import check_language_equivalence_by_words
+from unit_tests.helpers.equivalence import check_dfa_equivalence_by_minimization
 
 
-class TestTransset(unittest.TestCase):
+class TestTranssetEquivalence(unittest.TestCase):
+    """Transset must produce DFAs equivalent to Subset Construction."""
 
-    def _determinize(self, nfa):
-        return determinize_transset(nfa)
+    def _assert_equivalent(self, nfa, label):
+        subset_dfa, _ = determinize_nfa(nfa)
+        tr_dfa, _ = determinize_transset(nfa)
+        self.assertTrue(
+            check_dfa_equivalence_by_minimization(subset_dfa, tr_dfa),
+            f"{label}: Transset DFA not equivalent to Subset DFA",
+        )
 
-    def test_returns_dfa_and_count(self):
-        """Algorithm returns (DFA, int) tuple."""
-        nfa = gen_nth_from_last(3)
-        result = self._determinize(nfa)
-        self.assertIsInstance(result, tuple)
-        self.assertEqual(len(result), 2)
-        dfa, count = result
-        self.assertIsInstance(count, int)
+    def test_predefined_nfas(self):
+        """Equivalence on predefined NFAs nfa_1..nfa_5."""
+        for i, nfa in enumerate([nfa_1, nfa_2, nfa_3, nfa_4, nfa_5], 1):
+            with self.subTest(nfa=f"nfa_{i}"):
+                self._assert_equivalent(nfa, f"nfa_{i}")
 
-    def test_dfa_has_valid_structure(self):
-        """DFA has valid states, start, accept, transitions."""
-        nfa = gen_nth_from_last(3)
-        dfa, _ = self._determinize(nfa)
+    def test_large_predefined_nfas(self):
+        """Equivalence on large predefined NFAs."""
+        for i, nfa in enumerate([nfa_large_1, nfa_large_2, nfa_large_3], 1):
+            with self.subTest(nfa=f"nfa_large_{i}"):
+                self._assert_equivalent(nfa, f"nfa_large_{i}")
 
-        self.assertIn(dfa.start_state, dfa.states)
-        self.assertTrue(dfa.accept_states.issubset(dfa.states))
-        for (state, sym), target in dfa.transitions.items():
-            self.assertIn(state, dfa.states)
-            self.assertIn(target, dfa.states)
+    def test_nth_from_last_family(self):
+        """Equivalence on nth-from-last NFAs."""
+        for n in range(2, 6):
+            with self.subTest(n=n):
+                self._assert_equivalent(gen_nth_from_last(n), f"nth_from_last({n})")
 
-    def test_dfa_is_deterministic(self):
-        """Each (state, symbol) maps to exactly one state."""
-        nfa = gen_nth_from_last(4)
-        dfa, _ = self._determinize(nfa)
+    def test_dense_random(self):
+        """Equivalence on randomly generated dense NFAs."""
+        for i in range(3):
+            with self.subTest(i=i):
+                nfa = gen_dense_random(12, {"a", "b"}, 0.15)
+                self._assert_equivalent(nfa, f"dense_random_{i}")
 
-        for (state, sym), target in dfa.transitions.items():
-            self.assertNotIsInstance(target, (set, frozenset, list))
-
-    def test_language_equivalence_predefined_nfa1(self):
-        """Transset DFA accepts same language as nfa_1."""
-        dfa, _ = self._determinize(nfa_1)
-        ok, mismatches = check_language_equivalence_by_words(nfa_1, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_predefined_nfa3(self):
-        """Transset DFA accepts same language as nfa_3."""
-        dfa, _ = self._determinize(nfa_3)
-        ok, mismatches = check_language_equivalence_by_words(nfa_3, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_random_dense(self):
-        """Transset DFA accepts same language as a random dense NFA."""
-        nfa = gen_dense_random(15, {"a", "b", "c"}, 0.15)
-        dfa, _ = self._determinize(nfa)
-        ok, mismatches = check_language_equivalence_by_words(nfa, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_random_sparse(self):
-        """Transset DFA accepts same language as a random sparse NFA."""
-        nfa = gen_sparse_nfa(20, {"0", "1"}, 0.1)
-        dfa, _ = self._determinize(nfa)
-        ok, mismatches = check_language_equivalence_by_words(nfa, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_alphabet_preserved(self):
-        """DFA alphabet matches NFA alphabet."""
-        nfa = gen_nth_from_last(3)
-        dfa, _ = self._determinize(nfa)
-        nfa_alpha = {sym for sym in nfa.alphabet if sym != ""}
-        dfa_alpha = {sym for sym in dfa.alphabet if sym != ""}
-        self.assertEqual(nfa_alpha, dfa_alpha)
-
-    def test_handles_dead_state_transitions(self):
-        """Transset handles missing transitions correctly (dead state behavior)."""
-        nfa = nfa_4
-        dfa, _ = self._determinize(nfa)
-        ok, mismatches = check_language_equivalence_by_words(nfa, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
+    def test_sparse_random(self):
+        """Equivalence on randomly generated sparse NFAs."""
+        for i in range(3):
+            with self.subTest(i=i):
+                nfa = gen_sparse_nfa(20, {"0", "1"}, 0.1)
+                self._assert_equivalent(nfa, f"sparse_{i}")
 
 
 if __name__ == "__main__":

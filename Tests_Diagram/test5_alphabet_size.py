@@ -15,16 +15,15 @@ import random
 import matplotlib.pyplot as plt
 
 from Tests_Diagram.nfa_generators import gen_variable_alphabet, measure
+from Tests_Diagram.cache import load_cache, save_cache, BASE_SOURCES
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 
 ALGORITHMS = [
     ("Subset",     determinize_nfa,  "ro-"),
     ("Brzozowski", determinize_brz,  "ms-"),
     ("Transset",   determinize_transset, "b^-"),
-    ("QSC",        determinize_qsc, "gD-"),
 ]
 
 NUM_STATES = 15
@@ -33,9 +32,17 @@ EDGE_PROB = 0.04
 SAMPLES = 2
 REPEATS = 3
 
+_PARAMS = {
+    "NUM_STATES": NUM_STATES,
+    "ALPHABET_SIZES": ALPHABET_SIZES,
+    "EDGE_PROB": EDGE_PROB,
+    "SAMPLES": SAMPLES,
+    "REPEATS": REPEATS,
+    "SEED": 53,
+}
 
 
-def run():
+def _compute():
     random.seed(53)
     results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
                for name, _, _ in ALGORITHMS}
@@ -66,10 +73,11 @@ def run():
 
             print(f"  {name:12s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
 
-    # --- Графіки ---
-    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
+    return results
 
-    ax = axes[0, 0]
+
+def _plot(results):
+    fig, ax = plt.subplots(figsize=(9, 6))
     for name, _, style in ALGORITHMS:
         ax.plot(ALPHABET_SIZES, results[name]["time"], style, label=name, markersize=6)
     ax.set_xlabel("Alphabet size |Σ|")
@@ -77,8 +85,12 @@ def run():
     ax.set_title(f"Test 5: Alphabet Size Impact — Time (n={NUM_STATES})")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend()
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test5_alphabet_size_time.png", dpi=150)
+    plt.close()
+    print("\nSaved: Tests_Diagram/test5_alphabet_size_time.png")
 
-    ax = axes[0, 1]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for name, _, style in ALGORITHMS:
         ax.plot(ALPHABET_SIZES, results[name]["mem"], style, label=name, markersize=6)
     ax.set_xlabel("Alphabet size |Σ|")
@@ -86,8 +98,12 @@ def run():
     ax.set_title(f"Test 5: Alphabet Size Impact — Memory (n={NUM_STATES})")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend()
+    plt.tight_layout()
+    plt.savefig("Tests_Diagram/test5_alphabet_size_memory.png", dpi=150)
+    plt.close()
+    print("Saved: Tests_Diagram/test5_alphabet_size_memory.png")
 
-    ax = axes[1, 0]
+    fig, ax = plt.subplots(figsize=(9, 6))
     for name, _, style in ALGORITHMS:
         ax.plot(ALPHABET_SIZES, results[name]["dfa_size"], style, label=name, markersize=6)
     ax.set_xlabel("Alphabet size |Σ|")
@@ -95,20 +111,18 @@ def run():
     ax.set_title(f"Test 5: Alphabet Size Impact — DFA Size (n={NUM_STATES})")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend()
-
-    ax = axes[1, 1]
-    for name, _, style in ALGORITHMS:
-        ax.plot(ALPHABET_SIZES, results[name]["ops"], style, label=name, markersize=6)
-    ax.set_xlabel("Alphabet size |Σ|")
-    ax.set_ylabel("Operations")
-    ax.set_title(f"Test 5: Alphabet Size Impact — Operations (n={NUM_STATES})")
-    ax.grid(True, linestyle="--", alpha=0.4)
-    ax.legend()
-
     plt.tight_layout()
-    plt.savefig("Tests_Diagram/test5_alphabet_size.png", dpi=150)
+    plt.savefig("Tests_Diagram/test5_alphabet_size_dfa_size.png", dpi=150)
     plt.close()
-    print("\nSaved: Tests_Diagram/test5_alphabet_size.png")
+    print("Saved: Tests_Diagram/test5_alphabet_size_dfa_size.png")
+
+
+def run():
+    results = load_cache("test5", _PARAMS, BASE_SOURCES)
+    if results is None:
+        results = _compute()
+        save_cache("test5", _PARAMS, BASE_SOURCES, results)
+    _plot(results)
 
 
 if __name__ == "__main__":

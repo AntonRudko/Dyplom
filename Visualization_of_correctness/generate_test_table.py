@@ -22,11 +22,9 @@ sys.path.insert(0, PROJECT_ROOT)
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 from Algoritms.class_dfa_nfa import NFA, DFA
 
 from Analize.mocks.nfa import (
@@ -53,26 +51,22 @@ ALGORITHMS = [
     "Subset",
     "Brzozowski",
     "Transset",
-    "QSC",
     "Subset (ε)",
     "Brzozowski (ε)",
     "Transset (ε)",
-    "QSC (ε)",
 ]
 
 ALGO_FUNCS = {
     "Subset": determinize_nfa,
     "Brzozowski": determinize_brz,
     "Transset": determinize_transset,
-    "QSC": determinize_qsc,
     "Subset (ε)": determinize_nfa_epsilon,
     "Brzozowski (ε)": determinize_brz_epsilon,
     "Transset (ε)": determinize_transset_epsilon,
-    "QSC (ε)": determinize_qsc_epsilon,
 }
 
-REGULAR_ALGOS = ["Subset", "Brzozowski", "Transset", "QSC"]
-EPSILON_ALGOS = ["Subset (ε)", "Brzozowski (ε)", "Transset (ε)", "QSC (ε)"]
+REGULAR_ALGOS = ["Subset", "Brzozowski", "Transset"]
+EPSILON_ALGOS = ["Subset (ε)", "Brzozowski (ε)", "Transset (ε)"]
 
 # ── Визначення тестів ──────────────────────────────────────────────
 # Кожен тест: (назва_виду, список_алгоритмів, функція_перевірки)

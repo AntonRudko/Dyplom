@@ -4,6 +4,7 @@
 Використання:
     python -m Tests_Diagram.run_all_epsilon          # всі тести
     python -m Tests_Diagram.run_all_epsilon 1 3      # тільки тести 1 і 3
+    python -m Tests_Diagram.run_all_epsilon --no-cache
 """
 
 import sys
@@ -12,20 +13,18 @@ import random
 import matplotlib.pyplot as plt
 
 from Tests_Diagram.nfa_generators import gen_epsilon_chain, measure
+from Tests_Diagram.cache import load_cache, save_cache, EPS_SOURCES, ALL_SOURCES
 from Algoritms_with_epsilon.sub_set_epsilon import determinize_nfa_epsilon
 from Algoritms_with_epsilon.brzozowski_epsilon import determinize_brz_epsilon
 from Algoritms_with_epsilon.transset_epsilon import determinize_transset_epsilon
-from Algoritms_with_epsilon.qsc_epsilon import determinize_qsc_epsilon
 
 ALGORITHMS = [
     ("Subset+ε",     determinize_nfa_epsilon,      "ro-"),
     ("Brzozowski+ε", determinize_brz_epsilon,      "ms-"),
     ("Transset+ε",   determinize_transset_epsilon,  "b^-"),
-    ("QSC+ε",        determinize_qsc_epsilon,       "gD-"),
 ]
 
 OUTPUT_DIR = "Tests_Diagram_Epsilon"
-
 
 
 # ============================================================
@@ -33,68 +32,67 @@ OUTPUT_DIR = "Tests_Diagram_Epsilon"
 # ============================================================
 
 def run_test1():
-    """
-    Фіксована частка ε-переходів (30% від кількості станів),
-    зростаюча кількість станів НКА.
-    """
     SIZES = [8, 10, 12, 15, 18, 20, 25]
     EPS_RATIO = 0.3
     SAMPLES = 3
     REPEATS = 3
 
-    results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
-               for name, _, _ in ALGORITHMS}
+    params = {"SIZES": SIZES, "EPS_RATIO": EPS_RATIO, "SAMPLES": SAMPLES, "REPEATS": REPEATS, "SEED": 53}
 
-    for n in SIZES:
-        num_eps = max(1, int(n * EPS_RATIO))
-        print(f"  states={n}, ε-transitions={num_eps}")
-        nfas = [gen_epsilon_chain(n, num_eps) for _ in range(SAMPLES)]
+    results = load_cache("eps_test1", params, EPS_SOURCES)
+    if results is None:
+        results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
+                   for name, _, _ in ALGORITHMS}
 
-        for name, alg, _ in ALGORITHMS:
-            times, mems, sizes, all_ops = [], [], [], []
-            for nfa in nfas:
-                t, m, s, ops = measure(alg, nfa, REPEATS)
-                times.append(t)
-                mems.append(m)
-                sizes.append(s)
-                all_ops.append(ops)
+        for n in SIZES:
+            num_eps = max(1, int(n * EPS_RATIO))
+            print(f"  states={n}, ε-transitions={num_eps}")
+            nfas = [gen_epsilon_chain(n, num_eps) for _ in range(SAMPLES)]
 
-            avg_t = sum(times) / len(times)
-            avg_m = sum(mems) / len(mems)
-            avg_s = sum(sizes) / len(sizes)
-            avg_ops = sum(all_ops) / len(all_ops)
+            for name, alg, _ in ALGORITHMS:
+                times, mems, sizes, all_ops = [], [], [], []
+                for nfa in nfas:
+                    t, m, s, ops = measure(alg, nfa, REPEATS)
+                    times.append(t); mems.append(m); sizes.append(s); all_ops.append(ops)
 
-            results[name]["time"].append(avg_t)
-            results[name]["mem"].append(avg_m)
-            results[name]["dfa_size"].append(avg_s)
-            results[name]["ops"].append(avg_ops)
+                avg_t = sum(times) / len(times)
+                avg_m = sum(mems) / len(mems)
+                avg_s = sum(sizes) / len(sizes)
+                avg_ops = sum(all_ops) / len(all_ops)
 
-            print(f"    {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  "
-                  f"DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
+                results[name]["time"].append(avg_t)
+                results[name]["mem"].append(avg_m)
+                results[name]["dfa_size"].append(avg_s)
+                results[name]["ops"].append(avg_ops)
+
+                print(f"    {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  "
+                      f"DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
+
+        save_cache("eps_test1", params, EPS_SOURCES, results)
 
     # --- Графіки ---
-    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
     metrics = [
-        (axes[0, 0], "time", "Time (s)", "Час виконання"),
-        (axes[0, 1], "mem", "Peak RAM (KB)", "Пам'ять"),
-        (axes[1, 0], "dfa_size", "DFA states", "Розмір DFA"),
-        (axes[1, 1], "ops", "Operations", "Операції"),
+        ("time", "Час (с)", "Час", "time", True),
+        ("mem", "Пікова RAM (КБ)", "Пам'ять", "memory", True),
+        ("dfa_size", "Станів ДСА", "Розмір ДСА", "dfa_size", True),
     ]
 
-    for ax, key, ylabel, title_ua in metrics:
+    for key, ylabel, title_ua, suffix, use_log in metrics:
+        fig, ax = plt.subplots(figsize=(9, 6))
         for name, _, style in ALGORITHMS:
             ax.plot(SIZES, results[name][key], style, label=name, markersize=6)
-        ax.set_xlabel("Кількість станів НКА")
+        ax.set_xlabel("Кількість станів НСА")
         ax.set_ylabel(ylabel)
         ax.set_title(f"Тест ε-1: Масштабування ε-ланцюга — {title_ua} (ε≈30%)")
+        if use_log:
+            ax.set_yscale("log")
         ax.grid(True, linestyle="--", alpha=0.4)
         ax.legend()
-
-    plt.tight_layout()
-    path = f"{OUTPUT_DIR}/eps_test1_chain_scaling.png"
-    plt.savefig(path, dpi=150)
-    plt.close()
-    print(f"\n  Saved: {path}")
+        plt.tight_layout()
+        path = f"{OUTPUT_DIR}/eps_test1_chain_scaling_{suffix}.png"
+        plt.savefig(path, dpi=150)
+        plt.close()
+        print(f"  Saved: {path}")
 
 
 # ============================================================
@@ -102,66 +100,67 @@ def run_test1():
 # ============================================================
 
 def run_test2():
-    """
-    Фіксований розмір НКА, змінюється кількість ε-переходів.
-    """
     NUM_STATES = 15
     EPSILON_COUNTS = [0, 1, 2, 3, 5, 8, 12, 18]
     SAMPLES = 3
     REPEATS = 3
 
-    results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
-               for name, _, _ in ALGORITHMS}
+    params = {"NUM_STATES": NUM_STATES, "EPSILON_COUNTS": EPSILON_COUNTS,
+              "SAMPLES": SAMPLES, "REPEATS": REPEATS, "SEED": 53}
 
-    for num_eps in EPSILON_COUNTS:
-        print(f"  states={NUM_STATES}, ε-transitions={num_eps}")
-        nfas = [gen_epsilon_chain(NUM_STATES, num_eps) for _ in range(SAMPLES)]
+    results = load_cache("eps_test2", params, EPS_SOURCES)
+    if results is None:
+        results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
+                   for name, _, _ in ALGORITHMS}
 
-        for name, alg, _ in ALGORITHMS:
-            times, mems, sizes, all_ops = [], [], [], []
-            for nfa in nfas:
-                t, m, s, ops = measure(alg, nfa, REPEATS)
-                times.append(t)
-                mems.append(m)
-                sizes.append(s)
-                all_ops.append(ops)
+        for num_eps in EPSILON_COUNTS:
+            print(f"  states={NUM_STATES}, ε-transitions={num_eps}")
+            nfas = [gen_epsilon_chain(NUM_STATES, num_eps) for _ in range(SAMPLES)]
 
-            avg_t = sum(times) / len(times)
-            avg_m = sum(mems) / len(mems)
-            avg_s = sum(sizes) / len(sizes)
-            avg_ops = sum(all_ops) / len(all_ops)
+            for name, alg, _ in ALGORITHMS:
+                times, mems, sizes, all_ops = [], [], [], []
+                for nfa in nfas:
+                    t, m, s, ops = measure(alg, nfa, REPEATS)
+                    times.append(t); mems.append(m); sizes.append(s); all_ops.append(ops)
 
-            results[name]["time"].append(avg_t)
-            results[name]["mem"].append(avg_m)
-            results[name]["dfa_size"].append(avg_s)
-            results[name]["ops"].append(avg_ops)
+                avg_t = sum(times) / len(times)
+                avg_m = sum(mems) / len(mems)
+                avg_s = sum(sizes) / len(sizes)
+                avg_ops = sum(all_ops) / len(all_ops)
 
-            print(f"    {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  "
-                  f"DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
+                results[name]["time"].append(avg_t)
+                results[name]["mem"].append(avg_m)
+                results[name]["dfa_size"].append(avg_s)
+                results[name]["ops"].append(avg_ops)
+
+                print(f"    {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  "
+                      f"DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
+
+        save_cache("eps_test2", params, EPS_SOURCES, results)
 
     # --- Графіки ---
-    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
     metrics = [
-        (axes[0, 0], "time", "Time (s)", "Час виконання"),
-        (axes[0, 1], "mem", "Peak RAM (KB)", "Пам'ять"),
-        (axes[1, 0], "dfa_size", "DFA states", "Розмір DFA"),
-        (axes[1, 1], "ops", "Operations", "Операції"),
+        ("time", "Час (с)", "Час", "time", True),
+        ("mem", "Пікова RAM (КБ)", "Пам'ять", "memory", True),
+        ("dfa_size", "Станів ДСА", "Розмір ДСА", "dfa_size", False),
     ]
 
-    for ax, key, ylabel, title_ua in metrics:
+    for key, ylabel, title_ua, suffix, use_log in metrics:
+        fig, ax = plt.subplots(figsize=(9, 6))
         for name, _, style in ALGORITHMS:
             ax.plot(EPSILON_COUNTS, results[name][key], style, label=name, markersize=6)
         ax.set_xlabel("Кількість ε-переходів")
         ax.set_ylabel(ylabel)
         ax.set_title(f"Тест ε-2: Вплив кількості ε-переходів — {title_ua} (n={NUM_STATES})")
+        if use_log:
+            ax.set_yscale("log")
         ax.grid(True, linestyle="--", alpha=0.4)
         ax.legend()
-
-    plt.tight_layout()
-    path = f"{OUTPUT_DIR}/eps_test2_epsilon_count.png"
-    plt.savefig(path, dpi=150)
-    plt.close()
-    print(f"\n  Saved: {path}")
+        plt.tight_layout()
+        path = f"{OUTPUT_DIR}/eps_test2_epsilon_count_{suffix}.png"
+        plt.savefig(path, dpi=150)
+        plt.close()
+        print(f"  Saved: {path}")
 
 
 # ============================================================
@@ -169,10 +168,6 @@ def run_test2():
 # ============================================================
 
 def run_test3():
-    """
-    Фіксований розмір НКА, ε-переходи утворюють ланцюги
-    різної глибини (послідовні ε: q0→q1→q2→...→qk).
-    """
     from Algoritms.class_dfa_nfa import NFA
 
     NUM_STATES = 20
@@ -180,72 +175,66 @@ def run_test3():
     SAMPLES = 3
     REPEATS = 3
 
+    params = {"NUM_STATES": NUM_STATES, "CHAIN_DEPTHS": CHAIN_DEPTHS,
+              "SAMPLES": SAMPLES, "REPEATS": REPEATS, "SEED": 53}
+
     def gen_deep_epsilon_chain(num_states, eps_depth):
-        """НКА з ε-ланцюгом заданої глибини."""
         state_list = [f"q{i}" for i in range(num_states)]
         states = set(state_list)
         tr = {}
-
-        # Детермінований ланцюг
         for i in range(num_states - 1):
             sym = str(i % 2)
             tr[(state_list[i], sym)] = {state_list[i + 1]}
-
-        # Недетермінізм
         for i in range(num_states):
             for sym in ("0", "1"):
                 if (state_list[i], sym) not in tr:
                     tr[(state_list[i], sym)] = {random.choice(state_list)}
-
-        # Послідовний ε-ланцюг: q0 →ε q1 →ε q2 →ε ... →ε q(depth)
         for i in range(min(eps_depth, num_states - 1)):
             tr.setdefault((state_list[i], ""), set()).add(state_list[i + 1])
-
         acc = {state_list[-1]}
         if num_states > 3:
             acc.add(state_list[num_states // 2])
-
         return NFA(states, {"0", "1", ""}, tr, "q0", acc)
 
-    results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
-               for name, _, _ in ALGORITHMS}
+    results = load_cache("eps_test3", params, EPS_SOURCES)
+    if results is None:
+        results = {name: {"time": [], "mem": [], "dfa_size": [], "ops": []}
+                   for name, _, _ in ALGORITHMS}
 
-    for depth in CHAIN_DEPTHS:
-        print(f"  states={NUM_STATES}, ε-chain depth={depth}")
-        nfas = [gen_deep_epsilon_chain(NUM_STATES, depth) for _ in range(SAMPLES)]
+        for depth in CHAIN_DEPTHS:
+            print(f"  states={NUM_STATES}, ε-chain depth={depth}")
+            nfas = [gen_deep_epsilon_chain(NUM_STATES, depth) for _ in range(SAMPLES)]
 
-        for name, alg, _ in ALGORITHMS:
-            times, mems, sizes, all_ops = [], [], [], []
-            for nfa in nfas:
-                t, m, s, ops = measure(alg, nfa, REPEATS)
-                times.append(t)
-                mems.append(m)
-                sizes.append(s)
-                all_ops.append(ops)
+            for name, alg, _ in ALGORITHMS:
+                times, mems, sizes, all_ops = [], [], [], []
+                for nfa in nfas:
+                    t, m, s, ops = measure(alg, nfa, REPEATS)
+                    times.append(t); mems.append(m); sizes.append(s); all_ops.append(ops)
 
-            avg_t = sum(times) / len(times)
-            avg_m = sum(mems) / len(mems)
-            avg_s = sum(sizes) / len(sizes)
-            avg_ops = sum(all_ops) / len(all_ops)
+                avg_t = sum(times) / len(times)
+                avg_m = sum(mems) / len(mems)
+                avg_s = sum(sizes) / len(sizes)
+                avg_ops = sum(all_ops) / len(all_ops)
 
-            results[name]["time"].append(avg_t)
-            results[name]["mem"].append(avg_m)
-            results[name]["dfa_size"].append(avg_s)
-            results[name]["ops"].append(avg_ops)
+                results[name]["time"].append(avg_t)
+                results[name]["mem"].append(avg_m)
+                results[name]["dfa_size"].append(avg_s)
+                results[name]["ops"].append(avg_ops)
 
-            print(f"    {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  "
-                  f"DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
+                print(f"    {name:14s}: time={avg_t:.4f}s  mem={avg_m:.1f}KB  "
+                      f"DFA≈{avg_s:.0f}  ops≈{avg_ops:.0f}")
+
+        save_cache("eps_test3", params, EPS_SOURCES, results)
 
     # --- Графіки ---
-    fig, axes = plt.subplots(2, 2, figsize=(18, 10))
     metrics = [
-        (axes[0, 0], "time", "Time (s)", "Час виконання"),
-        (axes[0, 1], "mem", "Peak RAM (KB)", "Пам'ять"),
-        (axes[1, 0], "dfa_size", "DFA states", "Розмір DFA"),
-        (axes[1, 1], "ops", "Operations", "Операції"),
+        ("time", "Time (s)", "Час виконання", "time"),
+        ("mem", "Peak RAM (KB)", "Пам'ять", "memory"),
+        ("dfa_size", "DFA states", "Розмір DFA", "dfa_size"),
     ]
 
-    for ax, key, ylabel, title_ua in metrics:
+    for key, ylabel, title_ua, suffix in metrics:
+        fig, ax = plt.subplots(figsize=(9, 6))
         for name, _, style in ALGORITHMS:
             ax.plot(CHAIN_DEPTHS, results[name][key], style, label=name, markersize=6)
         ax.set_xlabel("Глибина ε-ланцюга")
@@ -253,12 +242,11 @@ def run_test3():
         ax.set_title(f"Тест ε-3: Глибина ε-замикання — {title_ua} (n={NUM_STATES})")
         ax.grid(True, linestyle="--", alpha=0.4)
         ax.legend()
-
-    plt.tight_layout()
-    path = f"{OUTPUT_DIR}/eps_test3_closure_depth.png"
-    plt.savefig(path, dpi=150)
-    plt.close()
-    print(f"\n  Saved: {path}")
+        plt.tight_layout()
+        path = f"{OUTPUT_DIR}/eps_test3_closure_depth_{suffix}.png"
+        plt.savefig(path, dpi=150)
+        plt.close()
+        print(f"  Saved: {path}")
 
 
 # ============================================================
@@ -266,60 +254,64 @@ def run_test3():
 # ============================================================
 
 def run_test4():
-    """
-    Порівнює час ε-алгоритмів на НКА без ε-переходів (ε=0)
-    з базовими алгоритмами, щоб виміряти чистий overhead ε-closure.
-    """
     from Algoritms.sub_set import determinize_nfa
     from Algoritms.brzozowski import determinize_brz
     from Algoritms.transset import determinize_transset
-    from Algoritms.qsc import determinize_qsc
 
     BASE_ALGORITHMS = [
         ("Subset",     determinize_nfa),
         ("Brzozowski", determinize_brz),
         ("Transset",   determinize_transset),
-        ("QSC",        determinize_qsc),
     ]
 
     SIZES = [8, 10, 12, 15, 18, 20, 25]
     SAMPLES = 3
     REPEATS = 3
 
-    results_base = {name: [] for name, _ in BASE_ALGORITHMS}
-    results_eps = {name: [] for name, _, _ in ALGORITHMS}
+    params = {"SIZES": SIZES, "SAMPLES": SAMPLES, "REPEATS": REPEATS, "SEED": 53}
 
-    for n in SIZES:
-        print(f"  states={n}, ε-transitions=0")
-        nfas = [gen_epsilon_chain(n, 0) for _ in range(SAMPLES)]
+    cached = load_cache("eps_test4", params, ALL_SOURCES)
+    if cached is not None:
+        results_base = cached["base"]
+        results_eps = cached["eps"]
+    else:
+        results_base = {name: [] for name, _ in BASE_ALGORITHMS}
+        results_eps = {name: [] for name, _, _ in ALGORITHMS}
 
-        for name, alg in BASE_ALGORITHMS:
-            times = []
-            for nfa in nfas:
-                t, _, _, _ = measure(alg, nfa, REPEATS)
-                times.append(t)
-            avg_t = sum(times) / len(times)
-            results_base[name].append(avg_t)
-            print(f"    {name:14s}: time={avg_t:.6f}s")
+        for n in SIZES:
+            print(f"  states={n}, ε-transitions=0")
+            nfas = [gen_epsilon_chain(n, 0) for _ in range(SAMPLES)]
 
-        for name, alg, _ in ALGORITHMS:
-            times = []
-            for nfa in nfas:
-                t, _, _, _ = measure(alg, nfa, REPEATS)
-                times.append(t)
-            avg_t = sum(times) / len(times)
-            results_eps[name].append(avg_t)
-            print(f"    {name:14s}: time={avg_t:.6f}s")
+            for name, alg in BASE_ALGORITHMS:
+                times = []
+                for nfa in nfas:
+                    t, _, _, _ = measure(alg, nfa, REPEATS)
+                    times.append(t)
+                avg_t = sum(times) / len(times)
+                results_base[name].append(avg_t)
+                print(f"    {name:14s}: time={avg_t:.6f}s")
 
-    # --- Графік: overhead ε-closure ---
-    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
+            for name, alg, _ in ALGORITHMS:
+                times = []
+                for nfa in nfas:
+                    t, _, _, _ = measure(alg, nfa, REPEATS)
+                    times.append(t)
+                avg_t = sum(times) / len(times)
+                results_eps[name].append(avg_t)
+                print(f"    {name:14s}: time={avg_t:.6f}s")
 
-    colors_base = ["#e74c3c", "#9b59b6", "#3498db", "#1abc9c"]
-    colors_eps = ["#c0392b", "#8e44ad", "#2980b9", "#16a085"]
+        save_cache("eps_test4", params, ALL_SOURCES, {"base": results_base, "eps": results_eps})
 
-    ax = axes[0]
+    # --- Графіки ---
+    SIZES = [8, 10, 12, 15, 18, 20, 25]
+
+    colors_base = ["#e74c3c", "#9b59b6", "#3498db"]
+    colors_eps = ["#c0392b", "#8e44ad", "#2980b9"]
+
+    fig, ax = plt.subplots(figsize=(10, 7))
     ax.set_title("Тест ε-4: Абсолютний час (базові vs ε-варіанти, ε=0)")
-    for idx, (name, _) in enumerate(BASE_ALGORITHMS):
+    for idx, (name, _) in enumerate([("Subset", None), ("Brzozowski", None),
+                                      ("Transset", None)]):
         ax.plot(SIZES, results_base[name], "o-", label=name,
                 color=colors_base[idx], markersize=6)
     for idx, (name, _, _) in enumerate(ALGORITHMS):
@@ -329,14 +321,18 @@ def run_test4():
     ax.set_ylabel("Time (s)")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend(fontsize=8)
+    plt.tight_layout()
+    path = f"{OUTPUT_DIR}/eps_test4_time_absolute.png"
+    plt.savefig(path, dpi=150)
+    plt.close()
+    print(f"\n  Saved: {path}")
 
-    ax = axes[1]
+    fig, ax = plt.subplots(figsize=(10, 7))
     ax.set_title("Тест ε-4: Overhead ε-closure (ratio ε-час / базовий час)")
     alg_pairs = [
         ("Subset", "Subset+ε"),
         ("Brzozowski", "Brzozowski+ε"),
         ("Transset", "Transset+ε"),
-        ("QSC", "QSC+ε"),
     ]
     for idx, (base_name, eps_name) in enumerate(alg_pairs):
         ratios = []
@@ -352,23 +348,18 @@ def run_test4():
     ax.set_ylabel("Ratio (ε-час / базовий час)")
     ax.grid(True, linestyle="--", alpha=0.4)
     ax.legend(fontsize=8)
-
     plt.tight_layout()
-    path = f"{OUTPUT_DIR}/eps_test4_overhead_vs_base.png"
+    path = f"{OUTPUT_DIR}/eps_test4_time_ratio.png"
     plt.savefig(path, dpi=150)
     plt.close()
-    print(f"\n  Saved: {path}")
+    print(f"  Saved: {path}")
 
 
 # ============================================================
-#  Тест 5: Коректність ε-алгоритмів
+#  Тест 5: Коректність ε-алгоритмів (не кешується)
 # ============================================================
 
 def run_test5():
-    """
-    Верифікація: всі 4 ε-алгоритми дають еквівалентні ДКА.
-    Тестує на різних конфігураціях ε-ланцюгів.
-    """
     NUM_WORDS = 200
 
     def _eps_closure(states, transitions):
@@ -472,10 +463,8 @@ def run_test5():
         return
 
     x = range(len(test_labels))
-    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
 
-    # Blowup ratio
-    ax = axes[0]
+    fig, ax = plt.subplots(figsize=(10, 7))
     blowups = [
         all_sizes[i].get("Subset+ε", all_nfa_sizes[i]) / all_nfa_sizes[i]
         if all_nfa_sizes[i] > 0 else 1
@@ -488,9 +477,13 @@ def run_test5():
     ax.set_title("Тест ε-5: State Blowup Ratio (ε-алгоритми)")
     ax.axhline(y=1, color="k", linestyle="--", alpha=0.3)
     ax.grid(True, linestyle="--", alpha=0.3, axis="y")
+    plt.tight_layout()
+    path = f"{OUTPUT_DIR}/eps_test5_blowup.png"
+    plt.savefig(path, dpi=150)
+    plt.close()
+    print(f"\n  Saved: {path}")
 
-    # Compression ratios vs Subset+ε
-    ax = axes[1]
+    fig, ax = plt.subplots(figsize=(10, 7))
     other_algs = [n for n, _, _ in ALGORITHMS if n != "Subset+ε"]
     n_algs = len(other_algs)
     width = 0.8 / n_algs
@@ -513,12 +506,11 @@ def run_test5():
     ax.axhline(y=1, color="k", linestyle="--", alpha=0.3)
     ax.grid(True, linestyle="--", alpha=0.3, axis="y")
     ax.legend(fontsize=8)
-
     plt.tight_layout()
-    path = f"{OUTPUT_DIR}/eps_test5_correctness.png"
+    path = f"{OUTPUT_DIR}/eps_test5_compression.png"
     plt.savefig(path, dpi=150)
     plt.close()
-    print(f"\n  Saved: {path}")
+    print(f"  Saved: {path}")
 
 
 # ============================================================
@@ -538,7 +530,9 @@ def main():
     random.seed(53)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    selected = sys.argv[1:] if len(sys.argv) > 1 else TESTS.keys()
+    selected = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if not selected:
+        selected = list(TESTS.keys())
 
     print("=" * 60)
     print("  Тести детермінізації: алгоритми з ε-замиканнями")

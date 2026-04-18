@@ -2,7 +2,7 @@
 Heatmap порівняння алгоритмів детермінізації.
 
 Генерує теплові карти, де:
-- Рядки — алгоритми (Subset, Brzozowski, Transset, Lazy)
+- Рядки — алгоритми (Subset, Brzozowski, Transset)
 - Стовпці — рівні щільності NFA або розміри NFA
 - Колір — відносна швидкість (час виконання)
 
@@ -23,7 +23,6 @@ from Tests_Diagram.nfa_generators import gen_dense_random, gen_sparse_nfa
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 
 # ── Конфігурація ──────────────────────────────────────────────
 
@@ -31,7 +30,6 @@ ALGORITHMS = [
     ("Subset",     determinize_nfa),
     ("Brzozowski", determinize_brz),
     ("Transset",   determinize_transset),
-    ("QSC",        determinize_qsc),
 ]
 
 ALG_NAMES = [name for name, _ in ALGORITHMS]

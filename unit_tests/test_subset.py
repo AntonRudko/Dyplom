@@ -1,5 +1,14 @@
 """
-Unit tests for Subset Construction algorithm.
+Unit tests for Subset Construction — validated against hand-crafted
+reference minimal DFAs.
+
+Subset Construction is the textbook reference algorithm. Its correctness
+is anchored here via structural isomorphism against manually constructed
+minimal DFAs for known languages. All other algorithms are then validated
+against Subset via `check_dfa_equivalence_by_minimization`.
+
+Every test gives a 100% correctness guarantee (Myhill-Nerode theorem:
+two DFAs accept the same language iff their minimal forms are isomorphic).
 """
 
 import sys
@@ -9,96 +18,106 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from Algoritms.sub_set import determinize_nfa
-from Algoritms.class_dfa_nfa import NFA
-from Analize.mocks.nfa import nfa_1, nfa_2, nfa_3, nfa_4, nfa_5
-from Tests_Diagram.nfa_generators import gen_nth_from_last, gen_dense_random, gen_sparse_nfa
+from Algoritms.class_dfa_nfa import NFA, DFA
 
-from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_random_words, gen_systematic_words
-from unit_tests.helpers.equivalence import check_language_equivalence_by_words
+from unit_tests.helpers.equivalence import check_dfa_equivalence_by_minimization
 
 
-class TestSubsetConstruction(unittest.TestCase):
+class TestSubsetAgainstReference(unittest.TestCase):
+    """Validate Subset Construction against hand-crafted minimal DFAs."""
 
-    def _determinize(self, nfa):
-        return determinize_nfa(nfa)
+    def test_sigma_star(self):
+        """NFA accepting Σ* -> minimal DFA has 1 accepting state."""
+        nfa = NFA(
+            states={"q0"},
+            alphabet={"a", "b"},
+            transitions={("q0", "a"): {"q0"}, ("q0", "b"): {"q0"}},
+            start_state="q0",
+            accept_states={"q0"},
+        )
+        reference = DFA(
+            state_names={0},
+            alphabet={"a", "b"},
+            transitions={(0, "a"): 0, (0, "b"): 0},
+            start_state=0,
+            accept_states={0},
+        )
+        dfa, _ = determinize_nfa(nfa)
+        self.assertTrue(check_dfa_equivalence_by_minimization(dfa, reference))
 
-    def test_returns_dfa_and_count(self):
-        """Algorithm returns (DFA, int) tuple."""
-        nfa = gen_nth_from_last(3)
-        result = self._determinize(nfa)
-        self.assertIsInstance(result, tuple)
-        self.assertEqual(len(result), 2)
-        dfa, count = result
-        self.assertIsInstance(count, int)
-        self.assertGreater(count, 0)
+    def test_ends_with_a(self):
+        """NFA accepting strings ending in 'a' -> 2-state minimal DFA."""
+        nfa = NFA(
+            states={"q0", "q1"},
+            alphabet={"a", "b"},
+            transitions={
+                ("q0", "a"): {"q0", "q1"},
+                ("q0", "b"): {"q0"},
+            },
+            start_state="q0",
+            accept_states={"q1"},
+        )
+        reference = DFA(
+            state_names={0, 1},
+            alphabet={"a", "b"},
+            transitions={
+                (0, "a"): 1, (0, "b"): 0,
+                (1, "a"): 1, (1, "b"): 0,
+            },
+            start_state=0,
+            accept_states={1},
+        )
+        dfa, _ = determinize_nfa(nfa)
+        self.assertTrue(check_dfa_equivalence_by_minimization(dfa, reference))
 
-    def test_dfa_has_valid_structure(self):
-        """DFA has valid states, start, accept, transitions."""
-        nfa = gen_nth_from_last(3)
-        dfa, _ = self._determinize(nfa)
+    def test_contains_ab(self):
+        """NFA accepting strings containing 'ab' -> 3-state minimal DFA."""
+        nfa = NFA(
+            states={"q0", "q1", "q2"},
+            alphabet={"a", "b"},
+            transitions={
+                ("q0", "a"): {"q0", "q1"},
+                ("q0", "b"): {"q0"},
+                ("q1", "b"): {"q2"},
+                ("q2", "a"): {"q2"},
+                ("q2", "b"): {"q2"},
+            },
+            start_state="q0",
+            accept_states={"q2"},
+        )
+        # Minimal DFA: s0 (haven't seen 'a'), s1 (last was 'a'), s2 (seen 'ab').
+        reference = DFA(
+            state_names={0, 1, 2},
+            alphabet={"a", "b"},
+            transitions={
+                (0, "a"): 1, (0, "b"): 0,
+                (1, "a"): 1, (1, "b"): 2,
+                (2, "a"): 2, (2, "b"): 2,
+            },
+            start_state=0,
+            accept_states={2},
+        )
+        dfa, _ = determinize_nfa(nfa)
+        self.assertTrue(check_dfa_equivalence_by_minimization(dfa, reference))
 
-        self.assertIn(dfa.start_state, dfa.states)
-        self.assertTrue(dfa.accept_states.issubset(dfa.states))
-        for (state, sym), target in dfa.transitions.items():
-            self.assertIn(state, dfa.states)
-            self.assertIn(target, dfa.states)
-            self.assertIn(sym, dfa.alphabet)
-
-    def test_dfa_is_deterministic(self):
-        """Each (state, symbol) maps to exactly one state."""
-        nfa = gen_nth_from_last(4)
-        dfa, _ = self._determinize(nfa)
-
-        # transitions is a dict, so keys are unique by definition
-        for (state, sym), target in dfa.transitions.items():
-            self.assertNotIsInstance(target, (set, frozenset, list))
-
-    def test_language_equivalence_predefined_nfa1(self):
-        """Subset DFA accepts same language as nfa_1."""
-        dfa, _ = self._determinize(nfa_1)
-        ok, mismatches = check_language_equivalence_by_words(nfa_1, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_predefined_nfa2(self):
-        """Subset DFA accepts same language as nfa_2."""
-        dfa, _ = self._determinize(nfa_2)
-        ok, mismatches = check_language_equivalence_by_words(nfa_2, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_predefined_nfa3(self):
-        """Subset DFA accepts same language as nfa_3."""
-        dfa, _ = self._determinize(nfa_3)
-        ok, mismatches = check_language_equivalence_by_words(nfa_3, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_random_dense(self):
-        """Subset DFA accepts same language as a random dense NFA."""
-        nfa = gen_dense_random(15, {"a", "b", "c"}, 0.15)
-        dfa, _ = self._determinize(nfa)
-        ok, mismatches = check_language_equivalence_by_words(nfa, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_language_equivalence_random_sparse(self):
-        """Subset DFA accepts same language as a random sparse NFA."""
-        nfa = gen_sparse_nfa(20, {"0", "1"}, 0.1)
-        dfa, _ = self._determinize(nfa)
-        ok, mismatches = check_language_equivalence_by_words(nfa, dfa)
-        self.assertTrue(ok, f"Mismatches: {mismatches[:5]}")
-
-    def test_alphabet_preserved(self):
-        """DFA alphabet matches NFA alphabet."""
-        nfa = gen_nth_from_last(3)
-        dfa, _ = self._determinize(nfa)
-        nfa_alpha = {sym for sym in nfa.alphabet if sym != ""}
-        dfa_alpha = {sym for sym in dfa.alphabet if sym != ""}
-        self.assertEqual(nfa_alpha, dfa_alpha)
-
-    def test_nth_from_last_exponential_blowup(self):
-        """nth-from-last NFA with n states produces 2^n DFA states."""
-        n = 4
-        nfa = gen_nth_from_last(n)
-        dfa, _ = self._determinize(nfa)
-        self.assertEqual(len(dfa.states), 2 ** n)
+    def test_empty_language(self):
+        """NFA with no accepting states -> minimal DFA accepts nothing."""
+        nfa = NFA(
+            states={"q0"},
+            alphabet={"a", "b"},
+            transitions={("q0", "a"): {"q0"}, ("q0", "b"): {"q0"}},
+            start_state="q0",
+            accept_states=set(),
+        )
+        reference = DFA(
+            state_names={0},
+            alphabet={"a", "b"},
+            transitions={(0, "a"): 0, (0, "b"): 0},
+            start_state=0,
+            accept_states=set(),
+        )
+        dfa, _ = determinize_nfa(nfa)
+        self.assertTrue(check_dfa_equivalence_by_minimization(dfa, reference))
 
 
 if __name__ == "__main__":

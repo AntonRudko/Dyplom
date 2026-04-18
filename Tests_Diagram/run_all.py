@@ -4,6 +4,7 @@
 Використання:
     python -m Tests_Diagram.run_all          # всі тести
     python -m Tests_Diagram.run_all 1 3      # тільки тести 1 і 3
+    python -m Tests_Diagram.run_all --no-cache   # ігнорувати кеш
 """
 
 import sys
@@ -24,7 +25,9 @@ def main():
         "8": ("Correctness Verification", "Tests_Diagram.test8_correctness"),
     }
 
-    selected = sys.argv[1:] if len(sys.argv) > 1 else tests.keys()
+    selected = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if not selected:
+        selected = list(tests.keys())
 
     for key in selected:
         if key not in tests:

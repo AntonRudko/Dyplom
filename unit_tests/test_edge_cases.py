@@ -1,5 +1,8 @@
 """
-Edge case tests for determinization algorithms.
+Edge case tests for determinization algorithms — validated via
+minimization + isomorphism against Subset Construction.
+
+Every test gives a 100% correctness guarantee (Myhill-Nerode theorem).
 """
 
 import sys
@@ -11,58 +14,51 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from Algoritms.sub_set import determinize_nfa
 from Algoritms.brzozowski import determinize_brz
 from Algoritms.transset import determinize_transset
-from Algoritms.qsc import determinize_qsc
 from Algoritms.class_dfa_nfa import NFA
 
-from unit_tests.helpers.dfa_helpers import run_dfa, run_nfa, gen_systematic_words
-from unit_tests.helpers.equivalence import check_language_equivalence_by_words
+from unit_tests.helpers.equivalence import check_dfa_equivalence_by_minimization
 
 
-ALGORITHMS = [
-    ("Subset", determinize_nfa),
+NON_REFERENCE_ALGORITHMS = [
     ("Brzozowski", determinize_brz),
     ("Transset", determinize_transset),
-    ("QSC", determinize_qsc),
 ]
 
 
 class TestEdgeCases(unittest.TestCase):
+    """All algorithms must agree with Subset Construction on edge-case NFAs."""
 
-    def _check_all(self, nfa, label=""):
-        """Check all algorithms produce correct DFA for given NFA."""
-        for name, func in ALGORITHMS:
+    def _check_all_equivalent_to_subset(self, nfa, label):
+        subset_dfa, _ = determinize_nfa(nfa)
+        for name, func in NON_REFERENCE_ALGORITHMS:
             with self.subTest(algorithm=name):
-                dfa, _ = func(nfa)
-                ok, mismatches = check_language_equivalence_by_words(nfa, dfa)
-                self.assertTrue(ok, f"{label}/{name}: {mismatches[:5]}")
+                other_dfa, _ = func(nfa)
+                self.assertTrue(
+                    check_dfa_equivalence_by_minimization(subset_dfa, other_dfa),
+                    f"{label}/{name}: not equivalent to Subset",
+                )
 
     def test_single_state_accepting(self):
-        """NFA with one accepting state (accepts all words)."""
+        """NFA with one accepting state (accepts Σ*)."""
         nfa = NFA(
             states={"q0"},
             alphabet={"a", "b"},
-            transitions={
-                ("q0", "a"): {"q0"},
-                ("q0", "b"): {"q0"},
-            },
+            transitions={("q0", "a"): {"q0"}, ("q0", "b"): {"q0"}},
             start_state="q0",
             accept_states={"q0"},
         )
-        self._check_all(nfa, "single_accept")
+        self._check_all_equivalent_to_subset(nfa, "single_accept")
 
     def test_single_state_rejecting(self):
-        """NFA with one non-accepting state (rejects everything except maybe empty)."""
+        """NFA with one non-accepting state (empty language)."""
         nfa = NFA(
             states={"q0"},
             alphabet={"a", "b"},
-            transitions={
-                ("q0", "a"): {"q0"},
-                ("q0", "b"): {"q0"},
-            },
+            transitions={("q0", "a"): {"q0"}, ("q0", "b"): {"q0"}},
             start_state="q0",
             accept_states=set(),
         )
-        self._check_all(nfa, "single_reject")
+        self._check_all_equivalent_to_subset(nfa, "single_reject")
 
     def test_no_transitions(self):
         """NFA with no transitions at all."""
@@ -73,12 +69,7 @@ class TestEdgeCases(unittest.TestCase):
             start_state="q0",
             accept_states={"q1"},
         )
-        for name, func in ALGORITHMS:
-            with self.subTest(algorithm=name):
-                dfa, _ = func(nfa)
-                # Only empty word or nothing accepted
-                self.assertFalse(run_dfa(dfa, "a"))
-                self.assertFalse(run_dfa(dfa, "aa"))
+        self._check_all_equivalent_to_subset(nfa, "no_transitions")
 
     def test_all_states_accepting(self):
         """NFA where all states are accepting."""
@@ -96,7 +87,7 @@ class TestEdgeCases(unittest.TestCase):
             start_state="q0",
             accept_states={"q0", "q1", "q2"},
         )
-        self._check_all(nfa, "all_accept")
+        self._check_all_equivalent_to_subset(nfa, "all_accept")
 
     def test_unreachable_states(self):
         """NFA with unreachable states."""
@@ -112,10 +103,10 @@ class TestEdgeCases(unittest.TestCase):
             start_state="q0",
             accept_states={"q1"},
         )
-        self._check_all(nfa, "unreachable")
+        self._check_all_equivalent_to_subset(nfa, "unreachable")
 
     def test_already_deterministic(self):
-        """NFA that is already deterministic (each transition has exactly one target)."""
+        """NFA that is already deterministic."""
         nfa = NFA(
             states={"q0", "q1", "q2"},
             alphabet={"a", "b"},
@@ -130,10 +121,10 @@ class TestEdgeCases(unittest.TestCase):
             start_state="q0",
             accept_states={"q2"},
         )
-        self._check_all(nfa, "already_det")
+        self._check_all_equivalent_to_subset(nfa, "already_det")
 
     def test_empty_target_sets(self):
-        """NFA with some transitions having empty target sets (dead ends)."""
+        """NFA with transitions to empty target sets (dead ends)."""
         nfa = NFA(
             states={"q0", "q1"},
             alphabet={"a", "b"},
@@ -146,7 +137,7 @@ class TestEdgeCases(unittest.TestCase):
             start_state="q0",
             accept_states={"q1"},
         )
-        self._check_all(nfa, "empty_targets")
+        self._check_all_equivalent_to_subset(nfa, "empty_targets")
 
     def test_self_loops_everywhere(self):
         """NFA with self-loops on every state and symbol."""
@@ -164,7 +155,7 @@ class TestEdgeCases(unittest.TestCase):
             start_state="q0",
             accept_states={"q2"},
         )
-        self._check_all(nfa, "self_loops")
+        self._check_all_equivalent_to_subset(nfa, "self_loops")
 
 
 if __name__ == "__main__":
