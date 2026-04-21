@@ -18,13 +18,23 @@ def run_nfa(nfa, word):
     return any(s in nfa.accept_states for s in current)
 
 def run_words(nfa, dfa, words, method_name="unknown"):
-    print(f"\n=== Determinization method: {method_name} ===")
+    print(f"\n=== Метод детермінізації: {method_name} ===")
     equal = True
+    lines = []
     for w in words:
         nfa_res = run_nfa(nfa, w)
         dfa_res = run_dfa(dfa, w)
-        print(f'word: "{w}" -- for NFA : {nfa_res} -- for DFA: {dfa_res}')
+        lines.append(f'слово: "{w}" -- для НСА : {nfa_res} -- для ДСА: {dfa_res}')
         if nfa_res != dfa_res:
             equal = False
-    print(f"Automats equal ? {equal}")
+
+    half = (len(lines) + 1) // 2
+    left, right = lines[:half], lines[half:]
+    width = max((len(l) for l in left), default=0)
+    for i in range(half):
+        l = left[i].ljust(width)
+        r = right[i] if i < len(right) else ""
+        print(f"{l} | {r}" if r else l)
+
+    print(f"Автомати розпізнають одну й туж саму мову ? {equal}")
     return equal
